@@ -8,5 +8,9 @@
         "parser": "angular"
       }
     }
-  ]
+  ],
+  "plugins": ["prettier-plugin-tailwindcss"],
+  "tailwindConfig": "./tailwind.config.js",
+  "tailwindPreserveWhitespace": true,
+  "tailwindPreserveDuplicates": true
 }
