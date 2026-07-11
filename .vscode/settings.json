@@ -2,5 +2,6 @@
   "editor.quickSuggestions": {
     "strings": "on"
   },
-  "css.lint.unknownAtRules": "ignore"
+  "css.lint.unknownAtRules": "ignore",
+  "js/ts.preferences.importModuleSpecifier": "non-relative"
 }

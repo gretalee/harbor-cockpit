@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { Service, signal } from '@angular/core';
 import { WidgetInstance } from './widget.model';
 
 const STORAGE_KEY = 'harbor-cockpit.widget-instances';
@@ -12,7 +12,7 @@ function loadFromStorage(): WidgetInstance[] {
   }
 }
 
-@Injectable({ providedIn: 'root' })
+@Service()
 export class WidgetInstancesStore {
   private readonly _instances = signal<WidgetInstance[]>(loadFromStorage());
   readonly instances = this._instances.asReadonly();
@@ -26,9 +26,7 @@ export class WidgetInstancesStore {
   }
 
   remove(instanceId: string): void {
-    this._instances.update((list) =>
-      list.filter((instance) => instance.instanceId !== instanceId),
-    );
+    this._instances.update((list) => list.filter((instance) => instance.instanceId !== instanceId));
     this.persist();
   }
 

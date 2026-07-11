@@ -1,8 +1,8 @@
 import { Component, inject, input, resource } from '@angular/core';
 import { NgComponentOutlet } from '@angular/common';
-import { WIDGET_CATALOG } from '../../data/widget-catalog';
-import { WidgetSkeleton } from '../widget-skeleton/widget-skeleton';
-import { WidgetError } from '../widget-error/widget-error';
+import { WIDGET_CATALOG } from '@features/dashboard/data/widget-catalog';
+import { WidgetSkeleton } from '@app/features/dashboard/components/widget-skeleton/widget-skeleton';
+import { WidgetError } from '@app/features/dashboard/components/widget-error/widget-error';
 
 @Component({
   selector: 'app-widget-loader',

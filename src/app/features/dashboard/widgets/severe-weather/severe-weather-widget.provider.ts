@@ -1,6 +1,6 @@
 import { makeEnvironmentProviders } from '@angular/core';
-import { WIDGET_CATALOG } from '../../data/widget-catalog';
-import { WidgetDefinition } from '../../data/widget.model';
+import { WIDGET_CATALOG } from '@app/features/dashboard/data/widget-catalog';
+import { WidgetDefinition } from '@app/features/dashboard/data/widget.model';
 
 const severeWeatherWidgetDefinition: WidgetDefinition = {
   id: 'severe-weather',

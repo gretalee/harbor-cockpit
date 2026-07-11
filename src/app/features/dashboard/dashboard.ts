@@ -1,9 +1,12 @@
 import { Component, computed, inject } from '@angular/core';
-import { WIDGET_CATALOG } from './data/widget-catalog';
-import { WidgetInstancesStore } from './data/widget-instances.store';
-import { WidgetLoader } from './components/widget-loader/widget-loader';
-import { WidgetShell } from './components/widget-shell/widget-shell';
-import { WidgetPicker, WidgetPickerItem } from './components/widget-picker/widget-picker';
+import { WIDGET_CATALOG } from '@features/dashboard/data/widget-catalog';
+import { WidgetInstancesStore } from '@features/dashboard/data/widget-instances.store';
+import { WidgetLoader } from '@features/dashboard/components/widget-loader/widget-loader';
+import { WidgetShell } from '@features/dashboard/components/widget-shell/widget-shell';
+import {
+  WidgetPicker,
+  WidgetPickerItem,
+} from '@features/dashboard/components/widget-picker/widget-picker';
 
 @Component({
   selector: 'app-dashboard',
