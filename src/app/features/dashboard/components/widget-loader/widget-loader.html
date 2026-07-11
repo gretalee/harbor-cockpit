@@ -1,0 +1,7 @@
+@if (componentType.isLoading()) {
+  <app-widget-skeleton />
+} @else if (componentType.error(); as error) {
+  <app-widget-error [message]="error.toString()" />
+} @else if (componentType.value(); as type) {
+  <ng-container *ngComponentOutlet="type; inputs: { config: config() }" />
+}

@@ -1,1 +1,13 @@
-<div class="mx-auto w-full max-w-[1800px] px-4 py-6"><h1>Dashboard</h1></div>
+<div class="relative mx-auto w-full max-w-[1800px] px-4 py-6">
+  <div class="absolute right-8 top-8 z-10">
+    <app-widget-picker [items]="pickerItems()" (pick)="addWidget($event)" />
+  </div>
+
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    @for (instance of store.instances(); track instance.instanceId) {
+      <app-widget-shell (remove)="removeWidget(instance.instanceId)">
+        <app-widget-loader [widgetId]="instance.widgetId" [config]="instance.config" />
+      </app-widget-shell>
+    }
+  </div>
+</div>
