@@ -14,9 +14,12 @@ export class Dashboard {
   private readonly catalog = inject(WIDGET_CATALOG);
   protected readonly store = inject(WidgetInstancesStore);
 
-  protected readonly pickerItems = computed<WidgetPickerItem[]>(() =>
-    this.catalog.map((widget) => ({ id: widget.id, title: widget.title, icon: widget.icon })),
-  );
+  protected readonly pickerItems = computed<WidgetPickerItem[]>(() => {
+    const activeWidgetIds = new Set(this.store.instances().map((instance) => instance.widgetId));
+    return this.catalog
+      .filter((widget) => !activeWidgetIds.has(widget.id))
+      .map((widget) => ({ id: widget.id, title: widget.title, icon: widget.icon }));
+  });
 
   protected addWidget(widgetId: string): void {
     this.store.add(widgetId);

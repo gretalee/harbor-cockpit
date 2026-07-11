@@ -18,6 +18,9 @@ export class WidgetInstancesStore {
   readonly instances = this._instances.asReadonly();
 
   add(widgetId: string): void {
+    if (this._instances().some((instance) => instance.widgetId === widgetId)) {
+      return;
+    }
     this._instances.update((list) => [...list, { instanceId: crypto.randomUUID(), widgetId }]);
     this.persist();
   }
