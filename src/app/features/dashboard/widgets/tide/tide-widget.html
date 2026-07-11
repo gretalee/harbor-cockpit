@@ -1,0 +1,12 @@
+<div class="p-2">
+  <h2 class="text-lg font-medium">Tide</h2>
+  <ul class="mt-2 space-y-1 text-sm">
+    @for (entry of tides; track entry.time) {
+      <li class="flex items-center justify-between gap-4">
+        <span class="capitalize text-gray-500">{{ entry.type }} tide</span>
+        <span class="font-medium">{{ entry.time }}</span>
+        <span class="text-gray-500">{{ entry.level }}</span>
+      </li>
+    }
+  </ul>
+</div>
