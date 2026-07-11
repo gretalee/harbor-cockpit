@@ -1,0 +1,24 @@
+<div class="p-2">
+  <h2 class="text-lg font-medium">Severe Weather Warnings</h2>
+  @if (warnings.length === 0) {
+    <p class="mt-2 text-sm text-gray-500">No active warnings.</p>
+  } @else {
+    <ul class="mt-2 space-y-1 text-sm">
+      @for (warning of warnings; track warning.title) {
+        <li class="flex items-center justify-between gap-4">
+          <span
+            class="rounded px-1.5 py-0.5 text-xs font-medium uppercase"
+            [class.bg-red-100]="warning.severity === 'warning'"
+            [class.text-red-700]="warning.severity === 'warning'"
+            [class.bg-yellow-100]="warning.severity === 'watch'"
+            [class.text-yellow-700]="warning.severity === 'watch'"
+          >
+            {{ warning.severity }}
+          </span>
+          <span class="flex-1 font-medium">{{ warning.title }}</span>
+          <span class="text-gray-500">until {{ warning.validUntil }}</span>
+        </li>
+      }
+    </ul>
+  }
+</div>
