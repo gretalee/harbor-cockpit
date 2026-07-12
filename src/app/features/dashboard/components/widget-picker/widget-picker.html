@@ -4,18 +4,19 @@
   [cdkDropListData]="items()"
   [cdkDropListConnectedTo]="[connectedTo]"
   cdkDropListSortingDisabled
-  class="flex flex-col gap-2"
+  class="flex flex-col gap-2 px-4 py-6"
 >
   @for (item of items(); track item.id) {
-    <div
+    <button
+      type="button"
       cdkDrag
       [cdkDragData]="item"
-      class="flex cursor-grab items-center gap-2 rounded-md border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50 active:cursor-grabbing"
+      class="flex w-full cursor-grab items-center gap-2 rounded-md border border-gray-300 px-3 py-2 text-left text-sm hover:bg-gray-50 active:cursor-grabbing"
     >
       <img [src]="item.icon" alt="" class="h-4 w-4" />
       <span>{{ item.title }}</span>
-    </div>
+    </button>
   } @empty {
-    <p class="px-1 py-2 text-sm text-gray-500">Keine weiteren Widgets verfügbar</p>
+    <p class="px-1 py-2 text-sm text-gray-500">Keine weiteren Widgets verfügbar 🙁</p>
   }
 </div>

@@ -19,7 +19,11 @@ export class Flyout {
 
   @HostListener('document:click', ['$event'])
   protected onDocumentClick(event: MouseEvent): void {
-    if (this.open() && !this.elementRef.nativeElement.contains(event.target as Node)) {
+    if (
+      this.open() &&
+      event.target instanceof Node &&
+      !this.elementRef.nativeElement.contains(event.target)
+    ) {
       this.closed.emit();
     }
   }
