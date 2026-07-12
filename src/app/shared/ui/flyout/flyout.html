@@ -1,5 +1,17 @@
+<button
+  type="button"
+  [attr.aria-label]="ariaLabel()"
+  class="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 text-xl leading-none text-gray-600 hover:bg-gray-50"
+  (click)="$event.stopPropagation(); toggle()"
+>
+  <ng-content select="[flyoutTrigger]"></ng-content>
+</button>
 @if (open()) {
-  <div class="absolute right-0 top-full z-50 mt-2 w-80 rounded-lg border border-gray-200 bg-white p-3 shadow-lg">
+  <div
+    class="absolute z-50 w-80 rounded-lg border border-gray-200 bg-white p-3 shadow-lg {{ positionClasses[position()] }}"
+    [style.margin-top.px]="position() === 'bottom-left' || position() === 'bottom-right' ? offset() : null"
+    [style.margin-bottom.px]="position() === 'top-left' || position() === 'top-right' ? offset() : null"
+  >
     <ng-content></ng-content>
   </div>
 }

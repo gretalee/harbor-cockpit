@@ -1,20 +1,16 @@
-<div class="relative mx-auto w-full max-w-[1800px] px-4 py-6">
-  <div class="mb-6 flex items-center justify-end">
-    <div class="relative">
-      <button
-        type="button"
-        aria-label="Widget hinzufügen"
-        class="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 text-xl leading-none text-gray-600 hover:bg-gray-50"
-        (click)="$event.stopPropagation(); toggleFlyout()"
-      >
-        +
-      </button>
-      <app-flyout [open]="isFlyoutOpen()" (closed)="isFlyoutOpen.set(false)">
-        <app-widget-picker [items]="pickerItems()" />
-      </app-flyout>
-    </div>
-  </div>
+<ng-template #headerActionsTpl>
+  <app-flyout
+    [(open)]="isFlyoutOpen"
+    position="bottom-right"
+    [offset]="8"
+    ariaLabel="Widget hinzufügen"
+  >
+    <span flyoutTrigger>+</span>
+    <app-widget-picker [items]="pickerItems()" (pick)="onWidgetPicked($event)" />
+  </app-flyout>
+</ng-template>
 
+<div class="mx-auto w-full max-w-[1800px] px-4 py-6">
   <div
     cdkDropList
     cdkDropListOrientation="mixed"

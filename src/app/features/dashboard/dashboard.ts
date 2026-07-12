@@ -1,4 +1,13 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  computed,
+  inject,
+  OnDestroy,
+  signal,
+  TemplateRef,
+  viewChild,
+} from '@angular/core';
 import { CdkDropList, CdkDrag, CdkDragDrop } from '@angular/cdk/drag-drop';
 import { WIDGET_CATALOG } from '@features/dashboard/data/widget-catalog';
 import { WidgetInstancesStore } from '@features/dashboard/data/widget-instances.store';
@@ -13,15 +22,19 @@ import {
   WidgetPickerItem,
 } from '@features/dashboard/components/widget-picker/widget-picker';
 import { Flyout } from '@shared/ui/flyout/flyout';
+import { HeaderActions } from '@layout/header-actions';
 
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.html',
   imports: [WidgetLoader, WidgetShell, WidgetPicker, Flyout, CdkDropList, CdkDrag],
 })
-export class Dashboard {
+export class Dashboard implements AfterViewInit, OnDestroy {
   private readonly _catalog = inject(WIDGET_CATALOG);
   protected readonly store = inject(WidgetInstancesStore);
+  private readonly headerActions = inject(HeaderActions);
+
+  private readonly headerActionsTemplate = viewChild.required<TemplateRef<unknown>>('headerActionsTpl');
 
   protected readonly widgetPickerDropListId = WIDGET_PICKER_DROP_LIST_ID;
   protected readonly dashboardDropListId = DASHBOARD_DROP_LIST_ID;
@@ -46,8 +59,12 @@ export class Dashboard {
     })),
   );
 
-  protected toggleFlyout(): void {
-    this.isFlyoutOpen.update((open) => !open);
+  ngAfterViewInit(): void {
+    this.headerActions.set(this.headerActionsTemplate());
+  }
+
+  ngOnDestroy(): void {
+    this.headerActions.set(null);
   }
 
   protected onWidgetDropped(event: CdkDragDrop<unknown>): void {
@@ -56,6 +73,11 @@ export class Dashboard {
     }
     const item = event.item.data as WidgetPickerItem;
     this.store.add(item.id, item.config, event.currentIndex);
+    this.isFlyoutOpen.set(false);
+  }
+
+  protected onWidgetPicked(item: WidgetPickerItem): void {
+    this.store.add(item.id, item.config);
     this.isFlyoutOpen.set(false);
   }
 

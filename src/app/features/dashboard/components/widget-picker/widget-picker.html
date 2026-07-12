@@ -4,19 +4,37 @@
   [cdkDropListData]="items()"
   [cdkDropListConnectedTo]="[connectedTo]"
   cdkDropListSortingDisabled
-  class="flex flex-col gap-2 px-4 py-6"
+  class="flex flex-col gap-2 px-4 pb-8 pt-6"
 >
+  <h3>Verfügbare Widgets</h3>
+  <p
+    class="mb-2 rounded-lg border border-gray-300 bg-green-50 px-3 py-2 text-sm italic text-gray-500"
+    [ngClass]="{ 'opacity-50': items().length === 0 }"
+  >
+    Ziehe ein Widget auf eine beliebige Stelle im Dashboard. Mit einem einfachen Klick wird es ans
+    Ende der Liste angefügt.
+  </p>
+
+  <hr class="mb-2 mt-1 border border-dashed border-gray-300 bg-transparent opacity-30" />
+
   @for (item of items(); track item.id) {
     <button
       type="button"
       cdkDrag
       [cdkDragData]="item"
-      class="flex w-full cursor-grab items-center gap-2 rounded-md border border-gray-300 px-3 py-2 text-left text-sm hover:bg-gray-50 active:cursor-grabbing"
+      (click)="pick.emit(item)"
+      class="flex w-full cursor-grab gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 hover:shadow-md active:cursor-grabbing"
     >
-      <img [src]="item.icon" alt="" class="h-4 w-4" />
-      <span>{{ item.title }}</span>
+      <div class="0 flex flex-1 items-center gap-2 rounded-md bg-white text-left text-sm">
+        <img [src]="item.icon" alt="" class="h-4 w-4" />
+        <span>{{ item.title }}</span>
+      </div>
     </button>
   } @empty {
-    <p class="px-1 py-2 text-sm text-gray-500">Keine weiteren Widgets verfügbar 🙁</p>
+    <p class="px-1 py-2 text-sm text-gray-500">Widget-Liste leer 🙁</p>
+  }
+
+  @if (items().length !== 0) {
+    <p class="mt-2 text-xs text-gray-400">... ende der Liste</p>
   }
 </div>
