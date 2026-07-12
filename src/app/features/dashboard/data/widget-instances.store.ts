@@ -17,20 +17,24 @@ export class WidgetInstancesStore {
   private readonly _instances = signal<WidgetInstance[]>(loadFromStorage());
   readonly instances = this._instances.asReadonly();
 
-  add(widgetId: string): void {
+  add(widgetId: string, config: unknown = {}): void {
     if (this._instances().some((instance) => instance.widgetId === widgetId)) {
+      console.warn(`Widget "${widgetId}" is already added.`);
       return;
     }
-    this._instances.update((list) => [...list, { instanceId: crypto.randomUUID(), widgetId }]);
-    this.persist();
+    this._instances.update((list) => [
+      ...list,
+      { instanceId: crypto.randomUUID(), widgetId, config },
+    ]);
+    this._persist();
   }
 
   remove(instanceId: string): void {
     this._instances.update((list) => list.filter((instance) => instance.instanceId !== instanceId));
-    this.persist();
+    this._persist();
   }
 
-  private persist(): void {
+  private _persist(): void {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(this._instances()));
   }
 }

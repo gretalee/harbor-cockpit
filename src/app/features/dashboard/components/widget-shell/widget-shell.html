@@ -6,5 +6,9 @@
   >
     &times;
   </button>
+  <div class="mb-2 flex items-center gap-2 pr-6">
+    <img [src]="icon()" alt="" class="h-5 w-5" />
+    <h3 class="font-semibold text-gray-900">{{ title() }}</h3>
+  </div>
   <ng-content></ng-content>
 </div>

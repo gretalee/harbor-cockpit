@@ -1,5 +1,5 @@
 <div class="p-2">
-  <h2 class="text-lg font-medium">Severe Weather Warnings</h2>
+  <p class="text-sm text-gray-500">{{ region() }}</p>
   @if (warnings.length === 0) {
     <p class="mt-2 text-sm text-gray-500">No active warnings.</p>
   } @else {

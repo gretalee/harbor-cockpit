@@ -14,18 +14,30 @@ import {
   imports: [WidgetLoader, WidgetShell, WidgetPicker],
 })
 export class Dashboard {
-  private readonly catalog = inject(WIDGET_CATALOG);
+  private readonly _catalog = inject(WIDGET_CATALOG);
   protected readonly store = inject(WidgetInstancesStore);
 
   protected readonly pickerItems = computed<WidgetPickerItem[]>(() => {
     const activeWidgetIds = new Set(this.store.instances().map((instance) => instance.widgetId));
-    return this.catalog
+    return this._catalog
       .filter((widget) => !activeWidgetIds.has(widget.id))
-      .map((widget) => ({ id: widget.id, title: widget.title, icon: widget.icon }));
+      .map((widget) => ({
+        id: widget.id,
+        title: widget.title,
+        icon: widget.icon,
+        config: widget.defaultConfig,
+      }));
   });
 
-  protected addWidget(widgetId: string): void {
-    this.store.add(widgetId);
+  protected readonly dashboardWidgets = computed(() =>
+    this.store.instances().map((instance) => ({
+      instance,
+      definition: this._catalog.find((widget) => widget.id === instance.widgetId),
+    })),
+  );
+
+  protected addWidget(item: WidgetPickerItem): void {
+    this.store.add(item.id, item.config);
   }
 
   protected removeWidget(instanceId: string): void {

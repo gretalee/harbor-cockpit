@@ -13,15 +13,19 @@ export class WidgetLoader {
   readonly widgetId = input.required<string>();
   readonly config = input<unknown>();
 
-  private readonly catalog = inject(WIDGET_CATALOG);
+  private readonly _catalog = inject(WIDGET_CATALOG);
 
-  protected readonly componentType = resource({
+  protected readonly loadingResource = resource({
     params: () => this.widgetId(),
     loader: ({ params }) => {
-      const definition = this.catalog.find((widget) => widget.id === params);
+      const definition = this._catalog.find((widget) => widget.id === params);
+
+      // Widget not found
       if (!definition) {
-        return Promise.reject(new Error(`Unknown widget: ${params}`));
+        return Promise.reject(new Error(`Widget "${params}" konnte nicht geladen werden.`));
       }
+
+      // Load widget component
       return definition.loadComponent();
     },
   });

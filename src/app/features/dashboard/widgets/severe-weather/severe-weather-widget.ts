@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, computed, input } from '@angular/core';
 
 interface SevereWeatherWarning {
   severity: 'watch' | 'warning';
@@ -6,12 +6,18 @@ interface SevereWeatherWarning {
   validUntil: string;
 }
 
+interface SevereWeatherWidgetConfig {
+  region: string;
+}
+
 @Component({
   selector: 'app-severe-weather-widget',
   templateUrl: './severe-weather-widget.html',
 })
 export class SevereWeatherWidget {
-  readonly config = input<unknown>();
+  readonly config = input<SevereWeatherWidgetConfig>();
+
+  protected readonly region = computed(() => this.config()?.region ?? null);
 
   protected readonly warnings: SevereWeatherWarning[] = [
     { severity: 'warning', title: 'Gale force winds', validUntil: '22:00' },

@@ -1,5 +1,5 @@
 <div class="p-2">
-  <h2 class="text-lg font-medium">Tide</h2>
+  <p class="text-sm text-gray-500">{{ location() }}</p>
   <ul class="mt-2 space-y-1 text-sm">
     @for (entry of tides; track entry.time) {
       <li class="flex items-center justify-between gap-4">

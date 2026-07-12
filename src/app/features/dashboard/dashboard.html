@@ -4,9 +4,13 @@
   </div>
 
   <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-    @for (instance of store.instances(); track instance.instanceId) {
-      <app-widget-shell (remove)="removeWidget(instance.instanceId)">
-        <app-widget-loader [widgetId]="instance.widgetId" [config]="instance.config" />
+    @for (item of dashboardWidgets(); track item.instance.instanceId) {
+      <app-widget-shell
+        [title]="item.definition?.title ?? ''"
+        [icon]="item.definition?.icon ?? ''"
+        (remove)="removeWidget(item.instance.instanceId)"
+      >
+        <app-widget-loader [widgetId]="item.instance.widgetId" [config]="item.instance.config" />
       </app-widget-shell>
     }
   </div>

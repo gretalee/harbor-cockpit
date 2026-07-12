@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, computed, input } from '@angular/core';
 
 interface TideEntry {
   type: 'high' | 'low';
@@ -6,12 +6,17 @@ interface TideEntry {
   level: string;
 }
 
+interface TideWidgetConfig {
+  location: string;
+}
+
 @Component({
   selector: 'app-tide-widget',
   templateUrl: './tide-widget.html',
 })
 export class TideWidget {
-  readonly config = input<unknown>();
+  readonly config = input<TideWidgetConfig>();
+  protected readonly location = computed(() => this.config()?.location ?? null);
 
   protected readonly tides: TideEntry[] = [
     { type: 'high', time: '06:12', level: '3.2 m' },

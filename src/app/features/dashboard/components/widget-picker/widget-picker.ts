@@ -4,6 +4,7 @@ export interface WidgetPickerItem {
   id: string;
   title: string;
   icon: string;
+  config: unknown;
 }
 
 @Component({
@@ -12,5 +13,5 @@ export interface WidgetPickerItem {
 })
 export class WidgetPicker {
   readonly items = input<WidgetPickerItem[]>([]);
-  readonly pick = output<string>();
+  readonly pick = output<WidgetPickerItem>();
 }
