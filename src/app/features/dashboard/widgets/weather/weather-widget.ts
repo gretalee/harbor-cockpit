@@ -166,7 +166,7 @@ export class WeatherWidget {
   }
 
   protected goToPreviousDay(): void {
-    this.dayOffset.update((offset) => offset - 1);
+    this.dayOffset.update((offset) => Math.max(0, offset - 1));
   }
 
   protected goToNextDay(): void {
