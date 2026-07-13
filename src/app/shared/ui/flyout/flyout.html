@@ -1,0 +1,21 @@
+<button
+  type="button"
+  [attr.aria-label]="ariaLabel()"
+  [class]="triggerClasses()"
+  (click)="$event.stopPropagation(); toggle()"
+>
+  <ng-content select="[flyoutTrigger]"></ng-content>
+</button>
+@if (open()) {
+  <div
+    [class]="flyoutClasses()"
+    [style.margin-top.px]="
+      position() === 'bottom-left' || position() === 'bottom-right' ? offset() : null
+    "
+    [style.margin-bottom.px]="
+      position() === 'top-left' || position() === 'top-right' ? offset() : null
+    "
+  >
+    <ng-content></ng-content>
+  </div>
+}
