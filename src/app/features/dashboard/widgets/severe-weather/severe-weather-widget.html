@@ -1,7 +1,7 @@
 <div class="p-2">
   @if (warningsResource.isLoading()) {
     <div class="space-y-2 py-6">
-      <app-progress-bar [percent]="progress()" />
+      <app-progress-bar [percent]="loadingProgress()" />
       <p class="text-center text-xs text-gray-500">Warnlage wird geladen …</p>
     </div>
   } @else if (warningsResource.error()) {

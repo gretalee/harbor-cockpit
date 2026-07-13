@@ -10,7 +10,6 @@ export interface SevereWeatherWidgetConfig {
   lon: number;
 }
 
-const ESTIMATED_LOAD_MS = 900;
 const REFRESH_DELAY_AFTER_REPORT_MS = 60_000;
 
 const dateTimeFormat = new Intl.DateTimeFormat('de-DE', {
@@ -36,23 +35,39 @@ export class SevereWeatherWidget {
   protected readonly lat = computed(() => this.config()?.lat ?? 53.558);
   protected readonly lon = computed(() => this.config()?.lon ?? 9.962);
 
+  protected readonly loadingProgress = signal(0);
+
   protected readonly warningsResource = resource({
-    loader: () => this.api.fetchWarnings(),
+    loader: () => {
+      // Reset synchronously, before any download-progress events can arrive, so this
+      // can never clobber a real in-flight percentage (see loadingProgress below).
+      this.loadingProgress.set(0);
+      return this.api.fetchWarnings((fraction) =>
+        this.loadingProgress.set(Math.round(fraction * 100)),
+      );
+    },
   });
 
   protected readonly issuedAt = computed(() => {
-    const data = this.warningsResource.value();
-    return data ? dateTimeFormat.format(new Date(data.time)) : null;
+    const result = this.warningsResource.value();
+    return result ? dateTimeFormat.format(new Date(result.data.time)) : null;
   });
 
+  // Prefers the feed's own "Expires" header (when the DWD server will next regenerate
+  // it) over a guess, since it reflects the real publishing cadence rather than an
+  // assumed hourly schedule. Only falls back to "next full hour" if that header is
+  // ever missing from a response.
   private readonly nextReportDate = computed<Date | null>(() => {
-    const data = this.warningsResource.value();
-    if (!data) {
+    const result = this.warningsResource.value();
+    if (!result) {
       return null;
     }
-    const next = new Date(data.time);
-    next.setHours(next.getHours() + 1, 0, 0, 0);
-    return next;
+    if (result.nextRefresh) {
+      return result.nextRefresh;
+    }
+    const fallback = new Date(result.data.time);
+    fallback.setHours(fallback.getHours() + 1, 0, 0, 0);
+    return fallback;
   });
 
   protected readonly nextReportEstimate = computed(() => {
@@ -61,11 +76,11 @@ export class SevereWeatherWidget {
   });
 
   protected readonly matchingWarnings = computed(() => {
-    const data = this.warningsResource.value();
-    if (!data) {
+    const result = this.warningsResource.value();
+    if (!result) {
       return [];
     }
-    return findWarningsForPoint(data.warnings, this.lat(), this.lon()).sort(
+    return findWarningsForPoint(result.data.warnings, this.lat(), this.lon()).sort(
       (a, b) => b.level - a.level,
     );
   });
@@ -96,25 +111,18 @@ export class SevereWeatherWidget {
     return warningLevelColorClass(level);
   }
 
-  protected readonly progress = signal(0);
-  loadingProgress = effect((onCleanup) => {
+  // Only handles the "done" edge - the reset to 0 lives in the loader itself (above) so
+  // it can never run after a real in-flight percentage from the download progress events.
+  loadingProgressEffect = effect(() => {
     if (!this.warningsResource.isLoading()) {
-      this.progress.set(100);
-      return;
+      this.loadingProgress.set(100);
     }
-    this.progress.set(0);
-    const start = Date.now();
-    const interval = setInterval(() => {
-      const elapsed = Date.now() - start;
-      this.progress.set(Math.min(90, (elapsed / ESTIMATED_LOAD_MS) * 90));
-    }, 50);
-    onCleanup(() => clearInterval(interval));
   });
 
-  // Once the estimated next official report has passed (plus a small buffer), fetch
-  // fresh data. The new response's "issued at" time re-derives nextReportDate, which
-  // re-runs this effect and schedules the following refresh - so this keeps repeating
-  // on its own for as long as the widget stays on the dashboard.
+  // Once the feed's own next-refresh time has passed (plus a small buffer), fetch fresh
+  // data. The new response's nextRefresh re-derives nextReportDate, which re-runs this
+  // effect and schedules the following refresh - so this keeps repeating on its own for
+  // as long as the widget stays on the dashboard.
   nextReportEffect = effect((onCleanup) => {
     const next = this.nextReportDate();
     if (!next) {
