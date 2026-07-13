@@ -1,0 +1,30 @@
+@if (!mapFailed()) {
+  <div class="aspect-6/3 relative w-full overflow-hidden rounded-md border border-gray-600">
+    <img
+      [src]="mapUrl()"
+      (error)="mapFailed.set(true)"
+      alt="Karte der amtlichen Wetterwarnungen für {{ label() }}"
+      class="h-full w-full object-cover"
+    />
+    @for (city of cityLabels(); track city.name) {
+      <div
+        class="absolute flex -translate-x-1/2 -translate-y-1/2 items-center gap-1"
+        [style.left.%]="city.leftPercent"
+        [style.top.%]="city.topPercent"
+      >
+        <span class="h-1.5 w-1.5 rounded-full bg-gray-700"></span>
+        <span class="rounded bg-white/80 px-1 text-[10px] font-medium text-gray-700 shadow-sm">
+          {{ city.name }}
+        </span>
+      </div>
+    }
+    <div class="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center">
+      <span class="h-3 w-3 rounded-full border-2 border-white bg-blue-600 shadow"></span>
+      <span
+        class="mt-0.5 whitespace-nowrap rounded bg-blue-600 px-1.5 py-0.5 text-[10px] font-semibold text-white shadow"
+      >
+        {{ label() }}
+      </span>
+    </div>
+  </div>
+}

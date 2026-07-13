@@ -9,7 +9,8 @@ const severeWeatherWidgetDefinition: WidgetDefinition = {
   id: 'severe-weather',
   title: 'Unwetterwarnungen',
   icon: `data:image/svg+xml;utf8,${encodeURIComponent(severeWeatherIconSvg)}`,
-  defaultConfig: { region: 'North Sea' },
+  defaultConfig: { region: 'Hamburg St. Pauli', lat: 53.558, lon: 9.962 },
+  columnSpan: 1,
   loadComponent: () => import('./severe-weather-widget').then((m) => m.SevereWeatherWidget),
 };
 

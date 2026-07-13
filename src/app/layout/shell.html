@@ -1,15 +1,15 @@
 <div class="flex min-h-dvh w-full flex-col">
   <!-- Page Header -->
-  <header
-    class="bg-linear-65 mx-auto flex w-full max-w-[1800px] items-center justify-between from-green-700 via-green-300 via-70% to-green-400 px-4 py-6"
-  >
-    <div class="flex items-center gap-4">
-      <img src="/apple-touch-icon.png" alt="Logo" class="h-12 w-auto shadow-md" />
-      <span class="text-3xl font-semibold uppercase tracking-wide text-white">Hafen-Cockpit</span>
+  <header class="bg-linear-65 from-green-700 via-green-300 via-70% to-green-400">
+    <div class="mx-auto flex w-full max-w-[1800px] items-center justify-between px-4 py-6">
+      <div class="flex items-center gap-4">
+        <img src="/apple-touch-icon.png" alt="Logo" class="h-12 w-auto shadow-md" />
+        <span class="text-3xl font-semibold uppercase tracking-wide text-white">Hafen-Cockpit</span>
+      </div>
+      @if (headerActions.template(); as template) {
+        <ng-container *ngTemplateOutlet="template"></ng-container>
+      }
     </div>
-    @if (headerActions.template(); as template) {
-      <ng-container *ngTemplateOutlet="template"></ng-container>
-    }
   </header>
 
   <!-- App Content -->
@@ -18,7 +18,9 @@
   </main>
 
   <!-- Footer -->
-  <footer class="mx-auto flex w-full max-w-[1800px] justify-end bg-green-950 px-4 py-6 text-white">
-    &copy; Hendrike 2026
+  <footer class="w-full bg-green-950">
+    <div class="mx-auto flex w-full max-w-[1800px] justify-end px-4 py-6 text-white">
+      &copy; Hendrike 2026
+    </div>
   </footer>
 </div>
