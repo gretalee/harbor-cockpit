@@ -10,7 +10,7 @@ export interface SevereWeatherWidgetConfig {
   lon: number;
 }
 
-const REFRESH_DELAY_AFTER_REPORT_MS = 60_000;
+const MIN_REFRESH_INTERVAL_MS = 60_000;
 
 const HAMBURG_DEFAULT_CONFIG: SevereWeatherWidgetConfig = {
   region: 'Hamburg St. Pauli',
@@ -57,8 +57,6 @@ export class SevereWeatherWidget {
 
   protected readonly warningsResource = resource({
     loader: () => {
-      // Reset synchronously, before any download-progress events can arrive, so this
-      // can never clobber a real in-flight percentage (see loadingProgress below).
       this.loadingProgress.set(0);
       return this.api.fetchWarnings((fraction) =>
         this.loadingProgress.set(Math.round(fraction * 100)),
@@ -71,10 +69,6 @@ export class SevereWeatherWidget {
     return result ? dateTimeFormat.format(new Date(result.data.time)) : null;
   });
 
-  // Prefers the feed's own "Expires" header (when the DWD server will next regenerate
-  // it) over a guess, since it reflects the real publishing cadence rather than an
-  // assumed hourly schedule. Only falls back to "next full hour" if that header is
-  // ever missing from a response.
   private readonly nextReportDate = computed<Date | null>(() => {
     const result = this.warningsResource.value();
     if (!result) {
@@ -129,25 +123,19 @@ export class SevereWeatherWidget {
     return warningLevelColorClass(level);
   }
 
-  // Only handles the "done" edge - the reset to 0 lives in the loader itself (above) so
-  // it can never run after a real in-flight percentage from the download progress events.
   loadingProgressEffect = effect(() => {
     if (!this.warningsResource.isLoading()) {
       this.loadingProgress.set(100);
     }
   });
 
-  // Once the feed's own next-refresh time has passed (plus a small buffer), fetch fresh
-  // data. The new response's nextRefresh re-derives nextReportDate, which re-runs this
-  // effect and schedules the following refresh - so this keeps repeating on its own for
-  // as long as the widget stays on the dashboard.
   nextReportEffect = effect((onCleanup) => {
     const next = this.nextReportDate();
     if (!next) {
       return;
     }
-    const refreshAt = next.getTime() + REFRESH_DELAY_AFTER_REPORT_MS;
-    const delay = Math.max(0, refreshAt - Date.now());
+    const refreshAt = next.getTime() + MIN_REFRESH_INTERVAL_MS;
+    const delay = Math.max(MIN_REFRESH_INTERVAL_MS, refreshAt - Date.now());
     const timeout = setTimeout(() => this.warningsResource.reload(), delay);
     onCleanup(() => clearTimeout(timeout));
   });

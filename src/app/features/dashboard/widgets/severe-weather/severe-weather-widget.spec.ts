@@ -98,6 +98,32 @@ describe('SevereWeatherWidget', () => {
     expect(fetchWarnings).toHaveBeenCalledTimes(2);
   });
 
+  it('never reloads more often than once a minute, even when the feed reports an already-elapsed next-refresh time', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-07-13T19:23:00+02:00'));
+    // The feed's own "Expires" hint is already 5 minutes in the past by the time this
+    // arrives - this happens for real: the header can stay unchanged across many
+    // requests until the feed's backend actually regenerates it.
+    fetchWarnings.mockResolvedValue(resultAt(Date.now(), new Date('2026-07-13T19:18:00+02:00')));
+
+    const fixture = TestBed.createComponent(SevereWeatherWidget);
+    fixture.detectChanges();
+    await vi.advanceTimersByTimeAsync(0);
+    fixture.detectChanges();
+
+    expect(fetchWarnings).toHaveBeenCalledTimes(1);
+
+    // Without a floor, the computed delay clamps to 0 and this would reload immediately,
+    // then do so again and again until the feed's backend finally catches up.
+    await vi.advanceTimersByTimeAsync(60 * 1000 - 1);
+    fixture.detectChanges();
+    expect(fetchWarnings).toHaveBeenCalledTimes(1);
+
+    await vi.advanceTimersByTimeAsync(1);
+    fixture.detectChanges();
+    expect(fetchWarnings).toHaveBeenCalledTimes(2);
+  });
+
   it('keeps existing content visible during a background refresh instead of showing the full loading skeleton again', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-07-13T19:23:00+02:00'));
