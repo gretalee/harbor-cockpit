@@ -12,6 +12,7 @@ export interface TideWidgetConfig {
 const ESTIMATED_LOAD_MS = 1000;
 const HISTORY_HOURS = 30;
 const CHART_DAYS = 4;
+const REGULAR_REFRESH_MS = 2 * 60 * 1000;
 
 const timeFormat = new Intl.DateTimeFormat('de-DE', {
   weekday: 'short',
@@ -42,13 +43,13 @@ export class TideWidget {
     () => this.config()?.uuid ?? 'd488c5cc-4de9-4631-8ce1-0db0e700b546',
   );
 
-  protected readonly levelsResource = resource({
+  protected readonly tideResource = resource({
     params: () => ({ uuid: this.uuid() }),
     loader: ({ params }) => this.api.fetchRecentLevels(params.uuid, HISTORY_HOURS),
   });
 
   protected readonly nextTides = computed(() => {
-    const measurements = this.levelsResource.value();
+    const measurements = this.tideResource.value();
     if (!measurements?.length) {
       return null;
     }
@@ -71,24 +72,6 @@ export class TideWidget {
     return this.sanitizer.bypassSecurityTrustResourceUrl(url);
   });
 
-  protected readonly progress = signal(0);
-
-  constructor() {
-    effect((onCleanup) => {
-      if (!this.levelsResource.isLoading()) {
-        this.progress.set(100);
-        return;
-      }
-      this.progress.set(0);
-      const start = Date.now();
-      const interval = setInterval(() => {
-        const elapsed = Date.now() - start;
-        this.progress.set(Math.min(90, (elapsed / ESTIMATED_LOAD_MS) * 90));
-      }, 50);
-      onCleanup(() => clearInterval(interval));
-    });
-  }
-
   protected formatTime(date: Date): string {
     return timeFormat.format(date);
   }
@@ -96,4 +79,25 @@ export class TideWidget {
   protected formatLevel(valueCm: number): string {
     return `${Math.round(valueCm)} cm`;
   }
+
+  protected readonly loadingProgress = signal(0);
+
+  progressEffect = effect((onCleanup) => {
+    if (!this.tideResource.isLoading()) {
+      this.loadingProgress.set(100);
+      return;
+    }
+    this.loadingProgress.set(0);
+    const start = Date.now();
+    const interval = setInterval(() => {
+      const elapsed = Date.now() - start;
+      this.loadingProgress.set(Math.min(90, (elapsed / ESTIMATED_LOAD_MS) * 90));
+    }, 50);
+    onCleanup(() => clearInterval(interval));
+  });
+
+  updateEffect = effect((onCleanup) => {
+    const interval = setInterval(() => this.tideResource.reload(), REGULAR_REFRESH_MS);
+    onCleanup(() => clearInterval(interval));
+  });
 }
