@@ -52,6 +52,12 @@ export class WeatherWidget {
   protected readonly canGoNext = computed(() => this.dayOffset() < 5);
   protected readonly isDaytime = this.nowHour >= 8 && this.nowHour < 18;
 
+  private readonly earliestDayBackOffset = signal<number | null>(null);
+  protected readonly canGoPrevious = computed(() => {
+    const earliest = this.earliestDayBackOffset();
+    return earliest === null || this.dayOffset() > earliest;
+  });
+
   protected readonly city = computed(() => this.config()?.city ?? 'Hamburg St. Pauli');
   private readonly lat = computed(() => this.config()?.lat ?? 53.558);
   private readonly lon = computed(() => this.config()?.lon ?? 9.962);
@@ -127,7 +133,9 @@ export class WeatherWidget {
   protected readonly currentPressure = computed(() => this.representative()?.pressureMsl ?? null);
 
   protected goToPreviousDay(): void {
-    this.dayOffset.update((offset) => Math.max(0, offset - 1));
+    if (this.canGoPrevious()) {
+      this.dayOffset.update((offset) => offset - 1);
+    }
   }
 
   protected goToNextDay(): void {
@@ -181,5 +189,17 @@ export class WeatherWidget {
   updateEffect = effect((onCleanup) => {
     const interval = setInterval(() => this.weatherResource.reload(), REGULAR_REFRESH_MS);
     onCleanup(() => clearInterval(interval));
+  });
+
+  // An empty (but successful) result means this day is outside the station's recorded
+  // history - not an error, just the end of the line. Step back onto the last day that
+  // did have data and remember the boundary so the button disables right there.
+  boundaryEffect = effect(() => {
+    const result = this.weatherResource.value();
+    if (result && result.length === 0) {
+      const emptyOffset = this.dayOffset();
+      this.earliestDayBackOffset.set(emptyOffset + 1);
+      this.dayOffset.set(emptyOffset + 1);
+    }
   });
 }

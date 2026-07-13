@@ -12,7 +12,7 @@ export interface TideWidgetConfig {
 const ESTIMATED_LOAD_MS = 1000;
 const HISTORY_HOURS = 30;
 const CHART_DAYS = 4;
-const REGULAR_REFRESH_MS = 2 * 60 * 1000;
+const REGULAR_REFRESH_MS = 10 * 60 * 1000;
 
 const timeFormat = new Intl.DateTimeFormat('de-DE', {
   weekday: 'short',

@@ -39,7 +39,9 @@ interface BrightSkyApiRecord {
 }
 
 interface BrightSkyApiResponse {
-  weather: BrightSkyApiRecord[];
+  // Absent (with a "No sources match your criteria" detail instead) once a date falls
+  // outside the station's recorded history - not an error, just no data for that day.
+  weather?: BrightSkyApiRecord[];
 }
 
 @Service()
@@ -52,7 +54,7 @@ export class BrightSkyApi {
         params: { lat, lon, date, tz: 'Europe/Berlin' },
       }),
     );
-    return response.weather.map((record) => ({
+    return (response.weather ?? []).map((record) => ({
       timestamp: record.timestamp,
       temperature: record.temperature,
       precipitation: record.precipitation,

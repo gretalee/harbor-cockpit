@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { WeatherWidget } from './weather-widget';
 import { BrightSkyApi, BrightSkyWeatherRecord } from './bright-sky-api';
 
@@ -40,6 +41,74 @@ describe('WeatherWidget', () => {
     await fixture.whenStable();
 
     expect(fixture.componentInstance).toBeTruthy();
+  });
+
+  it('keeps allowing the user to go further back as long as the station has data, past what used to be a fixed 5-day limit', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-07-13T10:00:00+02:00'));
+    fetchDay.mockImplementation(async (_lat: number, _lon: number, date: string) =>
+      recordsFor(date),
+    );
+
+    const fixture = TestBed.createComponent(WeatherWidget);
+    fixture.detectChanges();
+    await vi.advanceTimersByTimeAsync(0);
+    fixture.detectChanges();
+
+    const previousButton = fixture.debugElement.queryAll(By.css('button'))[0]
+      .nativeElement as HTMLButtonElement;
+
+    for (let day = 0; day < 8; day++) {
+      previousButton.click();
+      fixture.detectChanges();
+      await vi.advanceTimersByTimeAsync(0);
+      fixture.detectChanges();
+    }
+
+    // Would have been stuck after 5 clicks under the old fixed limit.
+    expect(fetchDay).toHaveBeenCalledTimes(9);
+    expect(previousButton.disabled).toBe(false);
+    expect(fixture.nativeElement.textContent).toContain('5. Juli');
+  });
+
+  it('stops and disables the button once the station runs out of history, snapping back to the last day that had data', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-07-13T10:00:00+02:00'));
+    const earliestAvailableDate = '2026-07-11';
+    fetchDay.mockImplementation(async (_lat: number, _lon: number, date: string) =>
+      date >= earliestAvailableDate ? recordsFor(date) : [],
+    );
+
+    const fixture = TestBed.createComponent(WeatherWidget);
+    fixture.detectChanges();
+    await vi.advanceTimersByTimeAsync(0);
+    fixture.detectChanges();
+
+    const previousButton = fixture.debugElement.queryAll(By.css('button'))[0]
+      .nativeElement as HTMLButtonElement;
+
+    // 07-12 and 07-11 have data; 07-10 doesn't, so the 3rd click must trigger the bounce.
+    for (let day = 0; day < 3; day++) {
+      previousButton.click();
+      fixture.detectChanges();
+      await vi.advanceTimersByTimeAsync(0);
+      fixture.detectChanges();
+      // Let any bounce-back reload settle before the next click.
+      await vi.advanceTimersByTimeAsync(0);
+      fixture.detectChanges();
+    }
+
+    expect(previousButton.disabled).toBe(true);
+    expect(fixture.nativeElement.textContent).toContain('11. Juli');
+
+    // Clicking again at the boundary must not trigger another fetch.
+    const callsAtBoundary = fetchDay.mock.calls.length;
+    previousButton.click();
+    fixture.detectChanges();
+    await vi.advanceTimersByTimeAsync(0);
+    fixture.detectChanges();
+
+    expect(fetchDay).toHaveBeenCalledTimes(callsAtBoundary);
   });
 
   it('refetches the selected day every 2 minutes, since Bright Sky gives no update hint', async () => {

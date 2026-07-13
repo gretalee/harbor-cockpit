@@ -2,7 +2,8 @@
   <div class="mb-4 flex items-center justify-between rounded-md bg-white p-1 text-sm">
     <button
       type="button"
-      class="flex items-center gap-1 whitespace-nowrap px-2 py-1 text-green-600 hover:bg-amber-50"
+      class="flex items-center gap-1 whitespace-nowrap px-2 py-1 text-green-600 hover:bg-amber-50 disabled:cursor-not-allowed disabled:text-gray-300 disabled:no-underline disabled:hover:bg-white"
+      [disabled]="!canGoPrevious()"
       (click)="goToPreviousDay()"
     >
       <span>←</span>
@@ -138,7 +139,7 @@
         <app-weather-icon
           [icon]="currentIcon()"
           iconClass="w-30 xl:w-40 h-30 xl:h-40"
-          class="-mb-6 shrink-0 -translate-y-6 text-gray-800"
+          class="-mb-12 shrink-0 -translate-y-10 text-gray-800"
         />
       </div>
     </div>
