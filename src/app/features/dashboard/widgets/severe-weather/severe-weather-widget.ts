@@ -11,6 +11,7 @@ export interface SevereWeatherWidgetConfig {
 }
 
 const ESTIMATED_LOAD_MS = 900;
+const REFRESH_DELAY_AFTER_REPORT_MS = 60_000;
 
 const dateTimeFormat = new Intl.DateTimeFormat('de-DE', {
   day: '2-digit',
@@ -44,14 +45,19 @@ export class SevereWeatherWidget {
     return data ? dateTimeFormat.format(new Date(data.time)) : null;
   });
 
-  protected readonly nextReportEstimate = computed(() => {
+  private readonly nextReportDate = computed<Date | null>(() => {
     const data = this.warningsResource.value();
     if (!data) {
       return null;
     }
     const next = new Date(data.time);
     next.setHours(next.getHours() + 1, 0, 0, 0);
-    return timeFormat.format(next);
+    return next;
+  });
+
+  protected readonly nextReportEstimate = computed(() => {
+    const next = this.nextReportDate();
+    return next ? timeFormat.format(next) : null;
   });
 
   protected readonly matchingWarnings = computed(() => {
@@ -67,6 +73,7 @@ export class SevereWeatherWidget {
   protected readonly primaryWarning = computed<DwdWarning | null>(
     () => this.matchingWarnings()[0] ?? null,
   );
+
   protected readonly additionalWarningCount = computed(() =>
     Math.max(0, this.matchingWarnings().length - 1),
   );
@@ -76,24 +83,6 @@ export class SevereWeatherWidget {
       ? `Für ${this.region()} liegt eine amtliche Wetterwarnung vor.`
       : `Für ${this.region()} liegen aktuell keine amtlichen Wetterwarnungen vor.`,
   );
-
-  protected readonly progress = signal(0);
-
-  constructor() {
-    effect((onCleanup) => {
-      if (!this.warningsResource.isLoading()) {
-        this.progress.set(100);
-        return;
-      }
-      this.progress.set(0);
-      const start = Date.now();
-      const interval = setInterval(() => {
-        const elapsed = Date.now() - start;
-        this.progress.set(Math.min(90, (elapsed / ESTIMATED_LOAD_MS) * 90));
-      }, 50);
-      onCleanup(() => clearInterval(interval));
-    });
-  }
 
   protected formatWarningPeriod(warning: DwdWarning): string {
     return `${timeFormat.format(new Date(warning.start))}–${timeFormat.format(new Date(warning.end))} Uhr`;
@@ -106,4 +95,34 @@ export class SevereWeatherWidget {
   protected levelColorClass(level: number): string {
     return warningLevelColorClass(level);
   }
+
+  protected readonly progress = signal(0);
+  loadingProgress = effect((onCleanup) => {
+    if (!this.warningsResource.isLoading()) {
+      this.progress.set(100);
+      return;
+    }
+    this.progress.set(0);
+    const start = Date.now();
+    const interval = setInterval(() => {
+      const elapsed = Date.now() - start;
+      this.progress.set(Math.min(90, (elapsed / ESTIMATED_LOAD_MS) * 90));
+    }, 50);
+    onCleanup(() => clearInterval(interval));
+  });
+
+  // Once the estimated next official report has passed (plus a small buffer), fetch
+  // fresh data. The new response's "issued at" time re-derives nextReportDate, which
+  // re-runs this effect and schedules the following refresh - so this keeps repeating
+  // on its own for as long as the widget stays on the dashboard.
+  nextReportEffect = effect((onCleanup) => {
+    const next = this.nextReportDate();
+    if (!next) {
+      return;
+    }
+    const refreshAt = next.getTime() + REFRESH_DELAY_AFTER_REPORT_MS;
+    const delay = Math.max(0, refreshAt - Date.now());
+    const timeout = setTimeout(() => this.warningsResource.reload(), delay);
+    onCleanup(() => clearTimeout(timeout));
+  });
 }
