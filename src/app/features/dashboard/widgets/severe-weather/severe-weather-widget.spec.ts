@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { SevereWeatherWidget } from './severe-weather-widget';
+import { SevereWeatherWidget, SevereWeatherWidgetConfig } from './severe-weather-widget';
 import { DwdWarningsApi, DwdWarningsFetchResult } from './dwd-warnings-api';
 import { ProgressBar } from '@shared/ui/progress-bar/progress-bar';
 
@@ -31,6 +31,20 @@ describe('SevereWeatherWidget', () => {
     await fixture.whenStable();
 
     expect(fixture.componentInstance).toBeTruthy();
+  });
+
+  it('falls back to the Hamburg defaults entirely when a persisted config is missing coordinates, instead of mismatching a saved region with Hamburg coordinates', async () => {
+    fetchWarnings.mockResolvedValue(resultAt(Date.now()));
+
+    const fixture = TestBed.createComponent(SevereWeatherWidget);
+    // Simulates a config persisted by an older app version that only stored the region.
+    fixture.componentRef.setInput('config', { region: 'Bremen' } as SevereWeatherWidgetConfig);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('Hamburg St. Pauli');
+    expect(fixture.nativeElement.textContent).not.toContain('Bremen');
   });
 
   it('reflects real download progress reported by the loader callback', async () => {
@@ -82,6 +96,51 @@ describe('SevereWeatherWidget', () => {
     await vi.advanceTimersByTimeAsync(1);
     fixture.detectChanges();
     expect(fetchWarnings).toHaveBeenCalledTimes(2);
+  });
+
+  it('keeps existing content visible during a background refresh instead of showing the full loading skeleton again', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-07-13T19:23:00+02:00'));
+
+    let resolveSecondFetch!: (value: DwdWarningsFetchResult) => void;
+    let callCount = 0;
+    fetchWarnings.mockImplementation(() => {
+      callCount++;
+      if (callCount === 1) {
+        return Promise.resolve(resultAt(Date.now(), new Date('2026-07-13T19:28:00+02:00')));
+      }
+      return new Promise<DwdWarningsFetchResult>((resolve) => {
+        resolveSecondFetch = resolve;
+      });
+    });
+
+    const fixture = TestBed.createComponent(SevereWeatherWidget);
+    fixture.detectChanges();
+    await vi.advanceTimersByTimeAsync(0);
+    fixture.detectChanges();
+
+    expect(fixture.debugElement.query(By.directive(ProgressBar))).toBeNull();
+    expect(fixture.nativeElement.textContent).toContain(
+      'liegen aktuell keine amtlichen Wetterwarnungen vor',
+    );
+
+    // Scheduled background refresh fires at 19:28 + 1 min = 19:29 (6 min after the initial fetch).
+    await vi.advanceTimersByTimeAsync(6 * 60 * 1000);
+    fixture.detectChanges();
+
+    expect(fetchWarnings).toHaveBeenCalledTimes(2);
+    // The background refresh must not blank out the widget behind the full loading skeleton.
+    expect(fixture.debugElement.query(By.directive(ProgressBar))).toBeNull();
+    expect(fixture.nativeElement.textContent).toContain(
+      'liegen aktuell keine amtlichen Wetterwarnungen vor',
+    );
+    expect(fixture.nativeElement.textContent).toContain('wird aktualisiert');
+
+    resolveSecondFetch(resultAt(Date.now()));
+    await vi.advanceTimersByTimeAsync(0);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).not.toContain('wird aktualisiert');
   });
 
   it('falls back to the next full hour when no next-refresh time is available, and keeps rescheduling', async () => {

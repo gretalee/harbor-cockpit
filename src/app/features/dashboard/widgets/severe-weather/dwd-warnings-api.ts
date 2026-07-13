@@ -49,7 +49,11 @@ export class DwdWarningsApi {
               if (event.total) {
                 onProgress?.(event.loaded / event.total);
               }
-            } else if (event.type === HttpEventType.Response && event.body) {
+            } else if (event.type === HttpEventType.Response) {
+              if (!event.body) {
+                reject(new Error('DWD-Warnungen: Antwort ohne Inhalt.'));
+                return;
+              }
               const expiresHeader = event.headers.get('Expires');
               resolve({
                 data: event.body,

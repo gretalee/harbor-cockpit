@@ -12,6 +12,12 @@ export interface SevereWeatherWidgetConfig {
 
 const REFRESH_DELAY_AFTER_REPORT_MS = 60_000;
 
+const HAMBURG_DEFAULT_CONFIG: SevereWeatherWidgetConfig = {
+  region: 'Hamburg St. Pauli',
+  lat: 53.558,
+  lon: 9.962,
+};
+
 const dateTimeFormat = new Intl.DateTimeFormat('de-DE', {
   day: '2-digit',
   month: '2-digit',
@@ -31,9 +37,21 @@ export class SevereWeatherWidget {
 
   readonly config = input<SevereWeatherWidgetConfig>();
 
-  protected readonly region = computed(() => this.config()?.region ?? 'Hamburg St. Pauli');
-  protected readonly lat = computed(() => this.config()?.lat ?? 53.558);
-  protected readonly lon = computed(() => this.config()?.lon ?? 9.962);
+  // Coordinates and region must come from the same source: a persisted config from an
+  // older app version might carry a region without lat/lon, which would otherwise show a
+  // mismatched label (saved region) next to data fetched for the Hamburg fallback
+  // coordinates. So the whole config is only trusted once both coordinates are present.
+  private readonly effectiveConfig = computed<SevereWeatherWidgetConfig>(() => {
+    const config = this.config();
+    if (config && typeof config.lat === 'number' && typeof config.lon === 'number') {
+      return config;
+    }
+    return HAMBURG_DEFAULT_CONFIG;
+  });
+
+  protected readonly region = computed(() => this.effectiveConfig().region);
+  protected readonly lat = computed(() => this.effectiveConfig().lat);
+  protected readonly lon = computed(() => this.effectiveConfig().lon);
 
   protected readonly loadingProgress = signal(0);
 
