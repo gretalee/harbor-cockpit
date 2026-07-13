@@ -50,10 +50,15 @@ export class Dashboard implements AfterViewInit, OnDestroy {
   });
 
   protected readonly dashboardWidgets = computed(() =>
-    this.store.instances().map((instance) => ({
-      instance,
-      definition: this._catalog.find((widget) => widget.id === instance.widgetId),
-    })),
+    this.store.instances().map((instance) => {
+      const definition = this._catalog.find((widget) => widget.id === instance.widgetId);
+      return {
+        instance,
+        definition,
+        columnSpanClass:
+          (definition?.columnSpan ?? 1) >= 2 ? 'col-span-1 sm:col-span-2 lg:col-span-2' : '',
+      };
+    }),
   );
 
   ngAfterViewInit(): void {
