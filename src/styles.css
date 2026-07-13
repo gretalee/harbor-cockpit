@@ -1,5 +1,9 @@
 @import 'tailwindcss';
 
+/* Generated with https://uicolors.app/generate
+ Base green: #50a76e
+ Base orange: #eb9b70
+ */
 @theme {
   --color-green-50: #f0f9f2;
   --color-green-100: #daf1df;
@@ -12,8 +16,36 @@
   --color-green-800: #1a4b2f;
   --color-green-900: #163e28;
   --color-green-950: #0c2217;
+
+  --color-orange-50: #fff9ec;
+  --color-orange-100: #fff1d3;
+  --color-orange-200: #ffdfa5;
+  --color-orange-300: #ffc76d;
+  --color-orange-400: #ffa532;
+  --color-orange-500: #ff890a;
+  --color-orange-600: #ff7300;
+  --color-orange-700: #cc5302;
+  --color-orange-800: #a1410b;
+  --color-orange-900: #82370c;
+  --color-orange-950: #461904;
 }
 
 h1 {
   @apply mb-2 mt-4 text-3xl text-green-500;
+}
+
+/* DragNDrop highlighting */
+.cdk-drag-preview {
+  & > *:first-child > div {
+    @apply rounded-lg border border-green-500 shadow-lg shadow-green-500/50;
+  }
+}
+.cdk-drag-placeholder {
+  & > *:first-child {
+    @apply opacity-40;
+    /* @apply outline-dashed outline-2 outline-offset-2 outline-green-400; */
+  }
+}
+.cdk-drop-list-dragging .cdk-drag:not(.cdk-drag-placeholder) {
+  transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
 }
