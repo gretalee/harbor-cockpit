@@ -1,12 +1,46 @@
 <div class="p-2">
-  <p class="text-sm text-gray-500">{{ location() }}</p>
-  <ul class="mt-2 space-y-1 text-sm">
-    @for (entry of tides; track entry.time) {
-      <li class="flex items-center justify-between gap-4">
-        <span class="capitalize text-gray-500">{{ entry.type }} tide</span>
-        <span class="font-medium">{{ entry.time }}</span>
-        <span class="text-gray-500">{{ entry.level }}</span>
-      </li>
+  @if (levelsResource.isLoading()) {
+    <div class="space-y-2 py-6">
+      <app-progress-bar [percent]="progress()" />
+      <p class="text-center text-xs text-gray-400">Gezeitendaten werden geladen …</p>
+    </div>
+  } @else if (levelsResource.error()) {
+    <p class="py-6 text-center text-sm text-red-600">Gezeitendaten konnten nicht geladen werden.</p>
+  } @else {
+    <p class="text-base text-gray-800">{{ location() }}</p>
+
+    @if (nextTides(); as tides) {
+      <table class="mt-2 table-auto border-separate text-sm text-gray-500">
+        <tbody>
+          <tr>
+            <td class="">Nächstes Hochwasser</td>
+            <td class="pl-4 font-semibold text-gray-700">
+              {{ formatTime(tides.nextHigh.time) }} Uhr
+            </td>
+            <td class="pl-4">{{ formatLevel(tides.nextHigh.value) }}</td>
+          </tr>
+          <tr>
+            <td class="">Nächstes Niedrigwasser</td>
+            <td class="pl-4 font-semibold text-gray-700">
+              {{ formatTime(tides.nextLow.time) }} Uhr
+            </td>
+            <td class="pl-4">{{ formatLevel(tides.nextLow.value) }}</td>
+          </tr>
+        </tbody>
+      </table>
+    } @else {
+      <p class="mt-2 text-sm text-gray-400">Keine Gezeitendaten verfügbar.</p>
     }
-  </ul>
+
+    <div
+      class="mt-4 flex h-[443px] w-full items-center justify-center overflow-x-auto overflow-y-hidden"
+    >
+      <iframe
+        [src]="chartUrl()"
+        title="Interaktive Wasserstands-Visualisierung"
+        class="border-bs-blue-900 h-[426px] w-[726px] rounded-md border"
+        scrolling="no"
+      ></iframe>
+    </div>
+  }
 </div>

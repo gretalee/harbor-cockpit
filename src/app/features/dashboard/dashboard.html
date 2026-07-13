@@ -23,7 +23,7 @@
     class="grid min-h-52 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
   >
     @for (item of dashboardWidgets(); track item.instance.instanceId) {
-      <div cdkDrag>
+      <div cdkDrag [class]="item.columnSpanClass">
         <app-widget-shell
           [title]="item.definition?.title ?? ''"
           [icon]="item.definition?.icon ?? ''"

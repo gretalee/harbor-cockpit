@@ -9,7 +9,8 @@ const tideWidgetDefinition: WidgetDefinition = {
   id: 'tide',
   title: 'Gezeiten',
   icon: `data:image/svg+xml;utf8,${encodeURIComponent(tideIconSvg)}`,
-  defaultConfig: { location: 'Cuxhaven' },
+  defaultConfig: { location: 'Hamburg St. Pauli', uuid: 'd488c5cc-4de9-4631-8ce1-0db0e700b546' },
+  columnSpan: 2,
   loadComponent: () => import('./tide-widget').then((m) => m.TideWidget),
 };
 
