@@ -9,7 +9,7 @@ const weatherWidgetDefinition: WidgetDefinition = {
   id: 'weather',
   title: 'Wetter',
   icon: `data:image/svg+xml;utf8,${encodeURIComponent(weatherIconSvg)}`,
-  defaultConfig: { city: 'Hamburg' },
+  defaultConfig: { city: 'Hamburg St. Pauli', lat: 53.558, lon: 9.962 },
   loadComponent: () => import('./weather-widget').then((m) => m.WeatherWidget),
 };
 

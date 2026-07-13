@@ -1,3 +1,142 @@
 <div class="p-2">
-  <p class="text-sm text-gray-500">{{ city() }}</p>
+  <div class="mb-4 flex items-center justify-between rounded-md bg-white p-1 text-sm">
+    <button
+      type="button"
+      class="flex items-center gap-1 whitespace-nowrap px-2 py-1 text-green-600 hover:bg-amber-50"
+      (click)="goToPreviousDay()"
+    >
+      <span>←</span>
+      <span>{{ previousDateLabel() }}</span>
+    </button>
+    <span class="truncate whitespace-nowrap font-semibold text-gray-800">{{ dateLabel() }}</span>
+    <button
+      type="button"
+      class="flex items-center gap-1 whitespace-nowrap px-2 py-1 text-green-600 hover:bg-amber-50 disabled:cursor-not-allowed disabled:text-gray-300 disabled:no-underline disabled:hover:bg-white"
+      [disabled]="!canGoNext()"
+      (click)="goToNextDay()"
+    >
+      <span>{{ nextDateLabel() }}</span>
+      <span>→</span>
+    </button>
+  </div>
+
+  @if (weatherResource.isLoading()) {
+    <div class="space-y-2 py-6">
+      <app-progress-bar [percent]="progress()" />
+      <p class="text-center text-xs text-gray-400">Wetterdaten werden geladen …</p>
+    </div>
+  } @else if (weatherResource.error()) {
+    <p class="py-6 text-center text-sm text-red-600">Wetterdaten konnten nicht geladen werden.</p>
+  } @else {
+    <div class="">
+      <div>
+        <div class="flex place-items-baseline gap-4">
+          <span [class]="maxTempClass">{{ formatTemperature(maxTemp()) }}</span>
+          <span [class]="minTempClass">{{ formatTemperature(minTemp()) }}</span>
+        </div>
+        <p class="mt-1 text-base text-gray-700">{{ city() }}</p>
+      </div>
+      <div class="mt-6 flex justify-between">
+        <ul class="space-y-1 text-sm text-gray-700">
+          <li class="flex items-center gap-2">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="h-4 w-4 shrink-0"
+            >
+              <path d="M4 10a8 8 0 0 1 16 0" />
+              <path d="M4 10h16" />
+              <path d="M12 10v9a2 2 0 0 1-2 2" />
+              <path d="M12 2v2" />
+            </svg>
+            <span>{{ formatFixed(currentPrecipitation(), 'mm/h') }}</span>
+          </li>
+          <li class="flex items-center gap-2">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              class="h-4 w-4 shrink-0"
+            >
+              <path d="M3 8h13a2 2 0 1 0-2-2" />
+              <path d="M3 13h9a2 2 0 1 1-2 2" />
+            </svg>
+            <span>{{ formatFixed(currentWindSpeed(), 'km/h') }}</span>
+          </li>
+          <li class="flex items-center gap-2">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              class="h-4 w-4 shrink-0"
+            >
+              <circle cx="12" cy="12" r="4" />
+              <line x1="12" y1="2" x2="12" y2="4" />
+              <line x1="12" y1="20" x2="12" y2="22" />
+              <line x1="4.2" y1="4.2" x2="5.6" y2="5.6" />
+              <line x1="18.4" y1="18.4" x2="19.8" y2="19.8" />
+              <line x1="2" y1="12" x2="4" y2="12" />
+              <line x1="20" y1="12" x2="22" y2="12" />
+              <line x1="4.2" y1="19.8" x2="5.6" y2="18.4" />
+              <line x1="18.4" y1="5.6" x2="19.8" y2="4.2" />
+            </svg>
+            <span>{{ sunshineLabel() ?? '–' }}</span>
+          </li>
+          <li class="flex items-center gap-2">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="h-4 w-4 shrink-0"
+            >
+              <path d="M6.5 17h11a4 4 0 0 0 .5-7.97A6 6 0 0 0 6.7 11.06 4 4 0 0 0 6.5 17Z" />
+            </svg>
+            <span>{{ formatRounded(currentCloudCover(), '%') }}</span>
+          </li>
+          <li class="flex items-center gap-2">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="h-4 w-4 shrink-0"
+            >
+              <path d="M4 15a8 8 0 1 1 16 0" />
+              <line x1="12" y1="15" x2="15" y2="10" />
+              <line x1="12" y1="15" x2="9" y2="15" />
+            </svg>
+            <span>{{ formatFixed(currentPressure(), 'hPa') }}</span>
+          </li>
+        </ul>
+        <app-weather-icon [icon]="currentIcon()" [size]="72" class="mr-4 shrink-0 text-gray-800" />
+      </div>
+    </div>
+
+    <div
+      class="mt-4 grid grid-cols-5 gap-2 border-t border-gray-100 pt-4 text-center text-gray-500"
+    >
+      @for (slot of footerHours(); track slot.label) {
+        <div class="flex flex-col items-center gap-1.5">
+          <p class="text-xs">{{ slot.label }}</p>
+          <app-weather-icon [icon]="slot.icon" [size]="28" class="mx-auto block text-gray-600" />
+          <p class="text-sm font-medium text-gray-700">
+            {{ formatRounded(slot.temperature, '°C') }}
+          </p>
+        </div>
+      }
+    </div>
+  }
 </div>
