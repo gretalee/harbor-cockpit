@@ -5,6 +5,8 @@
  Base orange: #ff7300
  */
 @theme {
+  --spacing: 4px;
+
   --color-green-50: #f0f9f2;
   --color-green-100: #daf1df;
   --color-green-200: #b8e2c3;

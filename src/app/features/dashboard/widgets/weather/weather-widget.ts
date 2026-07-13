@@ -11,6 +11,7 @@ export interface WeatherWidgetConfig {
 
 const FOOTER_HOURS = [4, 8, 12, 16, 20];
 const ESTIMATED_LOAD_MS = 1200;
+const REGULAR_REFRESH_MS = 2 * 60 * 1000;
 
 function addDays(date: Date, days: number): Date {
   const result = new Date(date);
@@ -50,15 +51,6 @@ export class WeatherWidget {
   protected readonly dayOffset = signal(0);
   protected readonly canGoNext = computed(() => this.dayOffset() < 5);
   protected readonly isDaytime = this.nowHour >= 8 && this.nowHour < 18;
-
-  private readonly _activeTempClass = 'text-3xl font-bold text-gray-900';
-  private readonly _inactiveTempClass = 'text-2xl font-bold text-gray-400';
-  protected readonly maxTempClass = this.isDaytime
-    ? this._activeTempClass
-    : this._inactiveTempClass;
-  protected readonly minTempClass = this.isDaytime
-    ? this._inactiveTempClass
-    : this._activeTempClass;
 
   protected readonly city = computed(() => this.config()?.city ?? 'Hamburg St. Pauli');
   private readonly lat = computed(() => this.config()?.lat ?? 53.558);
@@ -125,6 +117,7 @@ export class WeatherWidget {
     });
   });
 
+  protected readonly tempNow = computed(() => this.representative()?.temperature ?? null);
   protected readonly currentIcon = computed(() => this.representative()?.icon ?? null);
   protected readonly currentPrecipitation = computed(
     () => this.representative()?.precipitation ?? null,
@@ -132,38 +125,6 @@ export class WeatherWidget {
   protected readonly currentWindSpeed = computed(() => this.representative()?.windSpeed ?? null);
   protected readonly currentCloudCover = computed(() => this.representative()?.cloudCover ?? null);
   protected readonly currentPressure = computed(() => this.representative()?.pressureMsl ?? null);
-
-  protected readonly footerHours = computed(() => {
-    const records = this.records();
-    return FOOTER_HOURS.map((hour) => {
-      const record = records.find((entry) => new Date(entry.timestamp).getHours() === hour) ?? null;
-      const hourDate = new Date(this.selectedDate());
-      hourDate.setHours(hour, 0, 0, 0);
-      return {
-        label: hourFormat.format(hourDate),
-        icon: record?.icon ?? null,
-        temperature: record?.temperature ?? null,
-      };
-    });
-  });
-
-  protected readonly progress = signal(0);
-
-  constructor() {
-    effect((onCleanup) => {
-      if (!this.weatherResource.isLoading()) {
-        this.progress.set(100);
-        return;
-      }
-      this.progress.set(0);
-      const start = Date.now();
-      const interval = setInterval(() => {
-        const elapsed = Date.now() - start;
-        this.progress.set(Math.min(90, (elapsed / ESTIMATED_LOAD_MS) * 90));
-      }, 50);
-      onCleanup(() => clearInterval(interval));
-    });
-  }
 
   protected goToPreviousDay(): void {
     this.dayOffset.update((offset) => Math.max(0, offset - 1));
@@ -186,4 +147,39 @@ export class WeatherWidget {
   protected formatFixed(value: number | null, unit: string, fractionDigits = 1): string {
     return value == null ? '–' : `${value.toFixed(fractionDigits)} ${unit}`;
   }
+
+  protected readonly footerHours = computed(() => {
+    const records = this.records();
+    return FOOTER_HOURS.map((hour) => {
+      const record = records.find((entry) => new Date(entry.timestamp).getHours() === hour) ?? null;
+      const hourDate = new Date(this.selectedDate());
+      hourDate.setHours(hour, 0, 0, 0);
+      return {
+        label: hourFormat.format(hourDate),
+        icon: record?.icon ?? null,
+        temperature: record?.temperature ?? null,
+      };
+    });
+  });
+
+  protected readonly loadingProgress = signal(0);
+
+  loadingEffect = effect((onCleanup) => {
+    if (!this.weatherResource.isLoading()) {
+      this.loadingProgress.set(100);
+      return;
+    }
+    this.loadingProgress.set(0);
+    const start = Date.now();
+    const interval = setInterval(() => {
+      const elapsed = Date.now() - start;
+      this.loadingProgress.set(Math.min(90, (elapsed / ESTIMATED_LOAD_MS) * 90));
+    }, 50);
+    onCleanup(() => clearInterval(interval));
+  });
+
+  updateEffect = effect((onCleanup) => {
+    const interval = setInterval(() => this.weatherResource.reload(), REGULAR_REFRESH_MS);
+    onCleanup(() => clearInterval(interval));
+  });
 }
