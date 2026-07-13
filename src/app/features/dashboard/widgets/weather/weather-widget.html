@@ -131,7 +131,11 @@
             <span>{{ formatFixed(currentPressure(), 'hPa') }}</span>
           </li>
         </ul>
-        <app-weather-icon [icon]="currentIcon()" [size]="72" class="mr-4 shrink-0 text-gray-800" />
+        <app-weather-icon
+          [icon]="currentIcon()"
+          iconClass="w-30 xl:w-40 h-30 xl:h-40"
+          class="-mb-6 shrink-0 -translate-y-6 text-gray-800"
+        />
       </div>
     </div>
 
@@ -141,7 +145,11 @@
       @for (slot of footerHours(); track slot.label) {
         <div class="flex flex-col items-center gap-1.5">
           <p class="text-xs">{{ slot.label }}</p>
-          <app-weather-icon [icon]="slot.icon" [size]="28" class="mx-auto block text-gray-600" />
+          <app-weather-icon
+            [icon]="slot.icon"
+            iconClass="w-6 h-6"
+            class="mx-auto block text-gray-600"
+          />
           <p class="text-sm font-medium text-gray-700">
             {{ formatRounded(slot.temperature, '°C') }}
           </p>
