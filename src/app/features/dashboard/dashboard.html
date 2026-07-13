@@ -6,7 +6,11 @@
     ariaLabel="Widget hinzufügen"
   >
     <span flyoutTrigger>+</span>
-    <app-widget-picker [items]="pickerItems()" (pick)="onWidgetPicked($event)" />
+    <app-widget-picker
+      [items]="pickerItems()"
+      (pick)="onWidgetPicked($event)"
+      (droppedWithoutTarget)="onWidgetPicked($event)"
+    />
   </app-flyout>
 </ng-template>
 
@@ -15,12 +19,11 @@
     cdkDropList
     cdkDropListOrientation="mixed"
     [id]="dashboardDropListId"
-    [cdkDropListConnectedTo]="[widgetPickerDropListId]"
     (cdkDropListDropped)="onWidgetDropped($event)"
     class="grid min-h-52 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
   >
     @for (item of dashboardWidgets(); track item.instance.instanceId) {
-      <div cdkDrag [cdkDragDisabled]="true">
+      <div cdkDrag>
         <app-widget-shell
           [title]="item.definition?.title ?? ''"
           [icon]="item.definition?.icon ?? ''"

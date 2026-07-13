@@ -11,10 +11,7 @@ import {
 import { CdkDropList, CdkDrag, CdkDragDrop } from '@angular/cdk/drag-drop';
 import { WIDGET_CATALOG } from '@features/dashboard/data/widget-catalog';
 import { WidgetInstancesStore } from '@features/dashboard/data/widget-instances.store';
-import {
-  WIDGET_PICKER_DROP_LIST_ID,
-  DASHBOARD_DROP_LIST_ID,
-} from '@features/dashboard/data/drop-list-ids';
+import { DASHBOARD_DROP_LIST_ID } from '@features/dashboard/data/drop-list-ids';
 import { WidgetLoader } from '@features/dashboard/components/widget-loader/widget-loader';
 import { WidgetShell } from '@features/dashboard/components/widget-shell/widget-shell';
 import {
@@ -34,9 +31,9 @@ export class Dashboard implements AfterViewInit, OnDestroy {
   protected readonly store = inject(WidgetInstancesStore);
   private readonly headerActions = inject(HeaderActions);
 
-  private readonly headerActionsTemplate = viewChild.required<TemplateRef<unknown>>('headerActionsTpl');
+  private readonly headerActionsTemplate =
+    viewChild.required<TemplateRef<unknown>>('headerActionsTpl');
 
-  protected readonly widgetPickerDropListId = WIDGET_PICKER_DROP_LIST_ID;
   protected readonly dashboardDropListId = DASHBOARD_DROP_LIST_ID;
   protected readonly isFlyoutOpen = signal(false);
 
@@ -69,16 +66,19 @@ export class Dashboard implements AfterViewInit, OnDestroy {
 
   protected onWidgetDropped(event: CdkDragDrop<unknown>): void {
     if (event.previousContainer === event.container) {
+      if (event.previousIndex !== event.currentIndex) {
+        this.store.move(event.previousIndex, event.currentIndex);
+      }
       return;
     }
     const item = event.item.data as WidgetPickerItem;
     this.store.add(item.id, item.config, event.currentIndex);
-    this.isFlyoutOpen.set(false);
+    // this.isFlyoutOpen.set(false);
   }
 
   protected onWidgetPicked(item: WidgetPickerItem): void {
     this.store.add(item.id, item.config);
-    this.isFlyoutOpen.set(false);
+    // this.isFlyoutOpen.set(false);
   }
 
   protected removeWidget(instanceId: string): void {

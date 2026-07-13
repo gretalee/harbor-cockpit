@@ -1,4 +1,5 @@
-import { Component, ElementRef, inject, input, model } from '@angular/core';
+import { Component, computed, ElementRef, inject, input, model } from '@angular/core';
+import { cn } from '@app/shared/utils/cn';
 
 export type FlyoutPosition = 'bottom-left' | 'bottom-right' | 'top-left' | 'top-right';
 
@@ -18,6 +19,17 @@ export class Flyout {
   readonly position = input<FlyoutPosition>('bottom-right');
   readonly offset = input<number>(8);
   readonly ariaLabel = input<string>();
+  readonly triggerClasses = input<string>();
+
+  protected readonly triggerClss = computed(() =>
+    cn(
+      'h-9 w-9 rounded-full',
+      'flex items-center justify-center',
+      'text-xl font-bold leading-none hover:text-green-600',
+      'border border-gray-300 bg-white text-gray-600 hover:bg-gray-100',
+      this.triggerClasses(),
+    ),
+  );
 
   protected readonly positionClasses: Record<FlyoutPosition, string> = {
     'bottom-left': 'top-full left-0',
