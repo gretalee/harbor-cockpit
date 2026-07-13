@@ -20,7 +20,7 @@
     cdkDropListOrientation="mixed"
     [id]="dashboardDropListId"
     (cdkDropListDropped)="onWidgetDropped($event)"
-    class="grid min-h-52 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4"
+    class="grid min-h-52 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
   >
     @for (item of dashboardWidgets(); track item.instance.instanceId) {
       <div cdkDrag [class]="item.columnSpanClass">
@@ -34,4 +34,13 @@
       </div>
     }
   </div>
+
+  @if (dashboardWidgets().length === 0) {
+    <div
+      class="w-125 mx-auto mt-6 rounded-lg border border-dashed border-gray-200 p-6 text-center text-lg text-gray-400"
+    >
+      Noch keine Widgets ausgewählt. <br />
+      Nutze den Plus-Button, um dir die Widgets reinzuziehen, die du brauchst.
+    </div>
+  }
 </div>
