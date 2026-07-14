@@ -72,7 +72,7 @@ That's it — it now shows up in the picker, can be dragged onto the dashboard, 
 
 ## Honest trade-offs
 
-Things I'd tackle next with more time: widget configuration (location, gauge, coordinates) is fixed per widget definition and isn't user-editable through the UI yet; there's no dedicated e2e suite wired into CI (verification during development leaned on Playwright driven ad hoc against the real APIs); and there's no offline/degraded-network story beyond the existing per-widget error states.
+Things that would have made sense with more time: widget configuration (location, gauge, coordinates) is fixed per widget definition and isn't user-editable through the UI yet; there's no dedicated e2e suite wired into CI (verification during development leaned on Playwright driven ad hoc against the real APIs); and there's no offline/degraded-network story beyond the existing per-widget error states.
 
 ## Built together with Claude Code
 
