@@ -1,8 +1,8 @@
 <div class="p-2">
   @if (tideResource.isLoading()) {
-    <div class="space-y-2 py-6">
+    <div class="py-6">
       <app-progress-bar [percent]="loadingProgress()" />
-      <p class="text-center text-xs text-gray-400">Gezeitendaten werden geladen …</p>
+      <p class="mt-1 text-center text-xs text-gray-500">Gezeitendaten werden geladen …</p>
     </div>
   } @else if (tideResource.error()) {
     <p class="py-6 text-center text-sm text-red-600">Gezeitendaten konnten nicht geladen werden.</p>
@@ -29,7 +29,7 @@
         </tbody>
       </table>
     } @else {
-      <p class="mt-2 text-sm text-gray-400">Keine Gezeitendaten verfügbar.</p>
+      <p class="mt-2 text-sm text-gray-500">Keine Gezeitendaten verfügbar.</p>
     }
 
     <div
