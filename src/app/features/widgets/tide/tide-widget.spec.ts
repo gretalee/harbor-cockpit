@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { TideWidget } from './tide-widget';
-import { PegelOnlineApi, WaterLevelMeasurement } from './pegel-online-api';
+import { PegelOnlineApiService, WaterLevelMeasurement } from './pegel-online-api.service';
 
 // A clean semi-diurnal sine wave, well above the 40cm prominence threshold detectTideExtrema
 // requires, so the widget has a real, alternating high/low pattern to project forward from.
@@ -16,7 +16,8 @@ function sineWaveMeasurements(
   const points: WaterLevelMeasurement[] = [];
   for (let minute = 0; minute <= totalMinutes; minute += intervalMinutes) {
     const timestamp = new Date(startTime.getTime() + minute * 60 * 1000).toISOString();
-    const value = baselineCm + amplitudeCm * Math.sin((2 * Math.PI * minute * 60 * 1000) / periodMs);
+    const value =
+      baselineCm + amplitudeCm * Math.sin((2 * Math.PI * minute * 60 * 1000) / periodMs);
     points.push({ timestamp, value });
   }
   return points;
@@ -27,9 +28,12 @@ describe('TideWidget', () => {
 
   beforeEach(() => {
     fetchRecentLevels = vi.fn();
-    TestBed.configureTestingModule({
-      imports: [TideWidget],
-      providers: [{ provide: PegelOnlineApi, useValue: { fetchRecentLevels } }],
+    TestBed.configureTestingModule({ imports: [TideWidget] });
+    // PegelOnlineApiService is provided on the component itself (a widget-internal
+    // dependency, not part of the app-facing widget-provider interface), so a module-level
+    // provider in configureTestingModule can't reach it - it must be overridden here instead.
+    TestBed.overrideComponent(TideWidget, {
+      set: { providers: [{ provide: PegelOnlineApiService, useValue: { fetchRecentLevels } }] },
     });
   });
 

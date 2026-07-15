@@ -1,5 +1,5 @@
 import { Component, computed, input } from '@angular/core';
-import { BrightSkyIcon } from './bright-sky-api';
+import { BrightSkyIcon } from './bright-sky-api.service';
 import { cn } from '@app/shared/utils/cn';
 
 @Component({

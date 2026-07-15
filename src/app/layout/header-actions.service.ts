@@ -1,7 +1,7 @@
 import { Service, signal, TemplateRef } from '@angular/core';
 
 @Service()
-export class HeaderActions {
+export class HeaderActionsService {
   private readonly _template = signal<TemplateRef<unknown> | null>(null);
   readonly template = this._template.asReadonly();
 

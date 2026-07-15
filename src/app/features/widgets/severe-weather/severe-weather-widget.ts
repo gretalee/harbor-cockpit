@@ -1,5 +1,5 @@
 import { Component, computed, effect, inject, input, resource, signal } from '@angular/core';
-import { DwdWarningsApi, DwdWarning } from './dwd-warnings-api';
+import { DwdWarningsApiService, DwdWarning } from './dwd-warnings-api.service';
 import { findWarningsForPoint, warningLevelLabel, warningLevelColorClass } from './dwd-warnings';
 import { DwdWarningMap } from './dwd-warning-map';
 import { ProgressBar } from '@shared/ui/progress-bar/progress-bar';
@@ -31,9 +31,10 @@ const timeFormat = new Intl.DateTimeFormat('de-DE', { hour: '2-digit', minute: '
   selector: 'app-severe-weather-widget',
   templateUrl: './severe-weather-widget.html',
   imports: [ProgressBar, DwdWarningMap],
+  providers: [DwdWarningsApiService],
 })
 export class SevereWeatherWidget {
-  private readonly api = inject(DwdWarningsApi);
+  private readonly api = inject(DwdWarningsApiService);
 
   readonly config = input<SevereWeatherWidgetConfig>();
 

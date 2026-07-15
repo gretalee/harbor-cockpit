@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import { CdkDropList, CdkDrag, CdkDragDrop } from '@angular/cdk/drag-drop';
 import { WIDGET_CATALOG } from '@features/dashboard/data/widget-catalog';
-import { WidgetInstancesStore } from '@features/dashboard/data/widget-instances.store';
+import { DashboardStore } from '@app/features/dashboard/dashboard.store';
 import { DASHBOARD_DROP_LIST_ID } from '@features/dashboard/data/drop-list-ids';
 import { WidgetLoader } from '@features/dashboard/components/widget-loader/widget-loader';
 import { WidgetShell } from '@features/dashboard/components/widget-shell/widget-shell';
@@ -19,17 +19,18 @@ import {
   WidgetPickerItem,
 } from '@features/dashboard/components/widget-picker/widget-picker';
 import { Flyout } from '@shared/ui/flyout/flyout';
-import { HeaderActions } from '@layout/header-actions';
+import { HeaderActionsService } from '@app/layout/header-actions.service';
 
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.html',
   imports: [WidgetLoader, WidgetShell, WidgetPicker, Flyout, CdkDropList, CdkDrag],
+  providers: [DashboardStore],
 })
 export class Dashboard implements AfterViewInit, OnDestroy {
   private readonly _catalog = inject(WIDGET_CATALOG);
-  protected readonly store = inject(WidgetInstancesStore);
-  private readonly headerActions = inject(HeaderActions);
+  protected readonly store = inject(DashboardStore);
+  private readonly headerActions = inject(HeaderActionsService);
 
   private readonly headerActionsTemplate =
     viewChild.required<TemplateRef<unknown>>('headerActionsTpl');
@@ -37,8 +38,8 @@ export class Dashboard implements AfterViewInit, OnDestroy {
   protected readonly dashboardDropListId = DASHBOARD_DROP_LIST_ID;
   protected readonly isFlyoutOpen = signal(false);
 
-  protected readonly pickerItems = computed<WidgetPickerItem[]>(() => {
-    const activeWidgetIds = new Set(this.store.instances().map((instance) => instance.widgetId));
+  protected readonly availableWidgets = computed<WidgetPickerItem[]>(() => {
+    const activeWidgetIds = new Set(this.store.widgets().map((instance) => instance.widgetId));
     return this._catalog
       .filter((widget) => !activeWidgetIds.has(widget.id))
       .map((widget) => ({
@@ -50,7 +51,7 @@ export class Dashboard implements AfterViewInit, OnDestroy {
   });
 
   protected readonly dashboardWidgets = computed(() =>
-    this.store.instances().map((instance) => {
+    this.store.widgets().map((instance) => {
       const definition = this._catalog.find((widget) => widget.id === instance.widgetId);
       return {
         instance,

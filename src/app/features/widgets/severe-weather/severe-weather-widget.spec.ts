@@ -1,8 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { SevereWeatherWidget, SevereWeatherWidgetConfig } from './severe-weather-widget';
-import { DwdWarningsApi, DwdWarningsFetchResult } from './dwd-warnings-api';
 import { ProgressBar } from '@shared/ui/progress-bar/progress-bar';
+import { DwdWarningsApiService, DwdWarningsFetchResult } from './dwd-warnings-api.service';
 
 function resultAt(time: number, nextRefresh: Date | null = null): DwdWarningsFetchResult {
   return { data: { time, warnings: [] }, nextRefresh };
@@ -13,9 +13,12 @@ describe('SevereWeatherWidget', () => {
 
   beforeEach(() => {
     fetchWarnings = vi.fn();
-    TestBed.configureTestingModule({
-      imports: [SevereWeatherWidget],
-      providers: [{ provide: DwdWarningsApi, useValue: { fetchWarnings } }],
+    TestBed.configureTestingModule({ imports: [SevereWeatherWidget] });
+    // DwdWarningsApiService is provided on the component itself (a widget-internal
+    // dependency, not part of the app-facing widget-provider interface), so a module-level
+    // provider in configureTestingModule can't reach it - it must be overridden here instead.
+    TestBed.overrideComponent(SevereWeatherWidget, {
+      set: { providers: [{ provide: DwdWarningsApiService, useValue: { fetchWarnings } }] },
     });
   });
 
@@ -76,9 +79,7 @@ describe('SevereWeatherWidget', () => {
   it('prefers the real "Expires" next-refresh time over the next-full-hour fallback', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-07-13T19:23:00+02:00'));
-    fetchWarnings.mockResolvedValue(
-      resultAt(Date.now(), new Date('2026-07-13T19:28:00+02:00')),
-    );
+    fetchWarnings.mockResolvedValue(resultAt(Date.now(), new Date('2026-07-13T19:28:00+02:00')));
 
     const fixture = TestBed.createComponent(SevereWeatherWidget);
     fixture.detectChanges();

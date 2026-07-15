@@ -7,7 +7,7 @@
   >
     <span flyoutTrigger>+</span>
     <app-widget-picker
-      [items]="pickerItems()"
+      [items]="availableWidgets()"
       (pick)="onWidgetPicked($event)"
       (droppedWithoutTarget)="onWidgetPicked($event)"
     />

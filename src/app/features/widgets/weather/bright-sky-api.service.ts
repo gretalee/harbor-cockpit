@@ -44,8 +44,8 @@ interface BrightSkyApiResponse {
   weather?: BrightSkyApiRecord[];
 }
 
-@Service()
-export class BrightSkyApi {
+@Service({ autoProvided: false })
+export class BrightSkyApiService {
   private readonly http = inject(HttpClient);
 
   async fetchDay(lat: number, lon: number, date: string): Promise<BrightSkyWeatherRecord[]> {

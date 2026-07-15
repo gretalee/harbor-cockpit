@@ -1,6 +1,6 @@
 import { Service, signal } from '@angular/core';
 import { moveItemInArray } from '@angular/cdk/drag-drop';
-import { WidgetInstance } from './widget.model';
+import { WidgetInstance } from './data/widget.model';
 
 const STORAGE_KEY = 'harbor-cockpit.widget-instances';
 
@@ -13,26 +13,26 @@ function loadFromStorage(): WidgetInstance[] {
   }
 }
 
-@Service()
-export class WidgetInstancesStore {
-  private readonly _instances = signal<WidgetInstance[]>(loadFromStorage());
-  readonly instances = this._instances.asReadonly();
+@Service({ autoProvided: false })
+export class DashboardStore {
+  private readonly _widgets = signal<WidgetInstance[]>(loadFromStorage());
+  readonly widgets = this._widgets.asReadonly();
 
   add(widgetId: string, config: unknown = {}, index?: number): void {
-    if (this._instances().some((instance) => instance.widgetId === widgetId)) {
+    if (this._widgets().some((instance) => instance.widgetId === widgetId)) {
       console.warn(`Widget "${widgetId}" is already added.`);
       return;
     }
-    const newInstance: WidgetInstance = { instanceId: crypto.randomUUID(), widgetId, config };
-    this._instances.update((list) => {
+    const newWidget: WidgetInstance = { instanceId: crypto.randomUUID(), widgetId, config };
+    this._widgets.update((list) => {
       const insertAt = index ?? list.length;
-      return [...list.slice(0, insertAt), newInstance, ...list.slice(insertAt)];
+      return [...list.slice(0, insertAt), newWidget, ...list.slice(insertAt)];
     });
     this._persist();
   }
 
   move(previousIndex: number, currentIndex: number): void {
-    this._instances.update((list) => {
+    this._widgets.update((list) => {
       const reordered = list.slice();
       moveItemInArray(reordered, previousIndex, currentIndex);
       return reordered;
@@ -40,12 +40,12 @@ export class WidgetInstancesStore {
     this._persist();
   }
 
-  remove(instanceId: string): void {
-    this._instances.update((list) => list.filter((instance) => instance.instanceId !== instanceId));
+  remove(widgetId: string): void {
+    this._widgets.update((list) => list.filter((instance) => instance.instanceId !== widgetId));
     this._persist();
   }
 
   private _persist(): void {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(this._instances()));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(this._widgets()));
   }
 }

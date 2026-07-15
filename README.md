@@ -17,19 +17,24 @@ Widgets can be added via a "+" picker, dragged to reorder, dropped at any positi
 The app is an Angular 22 standalone-component app, running **zoneless** (no `zone.js`) — change detection is driven entirely by signals, `computed()`, and the new `resource()` API for async data.
 
 ```
-src/app/
-├── layout/                     shell chrome (header, footer)
-├── shared/ui, shared/utils     generic, widget-agnostic building blocks
-│                                (Flyout, ProgressBar, the cn() class helper)
-└── features/dashboard/
-    ├── data/                   WidgetDefinition/WidgetInstance models,
-    │                           the WIDGET_CATALOG injection token, and the
-    │                           localStorage-backed WidgetInstancesStore
-    ├── components/             dashboard-level plumbing (WidgetLoader,
-    │                           WidgetShell, WidgetPicker, skeleton/error states)
-    └── widgets/<name>/         one self-contained folder per widget:
-                                component + template + its own API service
-                                + its own spec file
+
+app/
+└── core/           Core features for global usage
+│   ├── auth
+│   └── api
+│
+└── layout/         Layout files, app-shell (header, footer)
+│
+└── features/       Domains with their individual contexts
+│   │
+│   ├── dashboard   Dashboard, that renders widgets, implements
+│   │               add/remove functionality
+│   └── widgets     One self-contained folder per widget:
+│                   component + template + its own API service
+│
+└── shared/         Reusable components, helpers, directives, ...
+    ├── ui
+    └── utils
 ```
 
 **The widget catalog is the whole trick.** Each widget registers itself into a multi-provided `WIDGET_CATALOG` `InjectionToken` via its own `provide<Name>Widget()` function (see `weather-widget.provider.ts`) — the dashboard never imports a concrete widget class. `app.routes.ts` just lists which providers are active for the route. This means:
@@ -42,7 +47,7 @@ src/app/
 
 This is deliberately the only interesting part of wiring up a new widget — everything else (loading, rendering, drag-and-drop, persistence, remove) is handled generically.
 
-1. Create `src/app/features/dashboard/widgets/<name>/`, with a standalone component (`<name>-widget.ts` + `.html`), and its own API service if it talks to an external source.
+1. Create `src/app/features/widgets/<name>/`, with a standalone component (`<name>-widget.ts` + `.html`), and its own API service if it talks to an external source.
 2. Add `<name>-widget.provider.ts`:
    ```ts
    const myWidgetDefinition: WidgetDefinition = {
@@ -55,7 +60,7 @@ This is deliberately the only interesting part of wiring up a new widget — eve
 
    export function provideMyWidget() {
      return makeEnvironmentProviders([
-       { provide: WIDGET_CATALOG, multi: true, useValue: myWidgetDefinition },
+       { provide: WIDGET_CATALOG, multi: true, useValue: myWidgetDefinition }
      ]);
    }
    ```
@@ -72,7 +77,7 @@ That's it — it now shows up in the picker, can be dragged onto the dashboard, 
 
 ## Honest trade-offs
 
-Things that would have made sense with more time: widget configuration (location, gauge, coordinates) is fixed per widget definition and isn't user-editable through the UI yet; there's no dedicated e2e suite wired into CI (verification during development leaned on Playwright driven ad hoc against the real APIs); and there's no offline/degraded-network story beyond the existing per-widget error states.
+Things that would have made sense with more time: widget configuration (location, coordinates) is fixed per widget definition and isn't user-editable through the UI yet; there's no dedicated e2e suite wired into CI (verification during development leaned on Playwright driven ad hoc against the real APIs); and there's no offline/degraded-network story beyond the existing per-widget error states.
 
 ## Built together with Claude Code
 

@@ -1,4 +1,4 @@
-import { WaterLevelMeasurement } from './pegel-online-api';
+import { WaterLevelMeasurement } from './pegel-online-api.service';
 
 export interface TideExtremum {
   type: 'high' | 'low';

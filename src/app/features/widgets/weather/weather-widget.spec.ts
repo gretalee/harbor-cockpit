@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { WeatherWidget } from './weather-widget';
-import { BrightSkyApi, BrightSkyWeatherRecord } from './bright-sky-api';
+import { BrightSkyApiService, BrightSkyWeatherRecord } from './bright-sky-api.service';
 
 function recordsFor(date: string): BrightSkyWeatherRecord[] {
   return [
@@ -23,9 +23,12 @@ describe('WeatherWidget', () => {
 
   beforeEach(() => {
     fetchDay = vi.fn();
-    TestBed.configureTestingModule({
-      imports: [WeatherWidget],
-      providers: [{ provide: BrightSkyApi, useValue: { fetchDay } }],
+    TestBed.configureTestingModule({ imports: [WeatherWidget] });
+    // BrightSkyApiService is provided on the component itself (a widget-internal
+    // dependency, not part of the app-facing widget-provider interface), so a module-level
+    // provider in configureTestingModule can't reach it - it must be overridden here instead.
+    TestBed.overrideComponent(WeatherWidget, {
+      set: { providers: [{ provide: BrightSkyApiService, useValue: { fetchDay } }] },
     });
   });
 

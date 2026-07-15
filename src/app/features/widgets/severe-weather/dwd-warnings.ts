@@ -1,4 +1,4 @@
-import { DwdWarning, DwdWarningRegion } from './dwd-warnings-api';
+import { DwdWarning, DwdWarningRegion } from './dwd-warnings-api.service';
 
 function isPointInRing(lon: number, lat: number, ring: number[][]): boolean {
   let inside = false;

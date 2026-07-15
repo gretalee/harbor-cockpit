@@ -1,6 +1,6 @@
 import { Component, computed, effect, inject, input, resource, signal } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { PegelOnlineApi } from './pegel-online-api';
+import { PegelOnlineApiService } from './pegel-online-api.service';
 import { detectTideExtrema, estimateNextTides } from './tide-extrema';
 import { ProgressBar } from '@shared/ui/progress-bar/progress-bar';
 
@@ -31,9 +31,10 @@ function toDateParam(date: Date): string {
   selector: 'app-tide-widget',
   templateUrl: './tide-widget.html',
   imports: [ProgressBar],
+  providers: [PegelOnlineApiService],
 })
 export class TideWidget {
-  private readonly api = inject(PegelOnlineApi);
+  private readonly api = inject(PegelOnlineApiService);
   private readonly sanitizer = inject(DomSanitizer);
 
   readonly config = input<TideWidgetConfig>();

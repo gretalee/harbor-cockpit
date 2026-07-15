@@ -35,8 +35,8 @@ export interface DwdWarningsFetchResult {
 const FEED_URL =
   'https://s3.eu-central-1.amazonaws.com/app-prod-static.warnwetter.de/v16/gemeinde_warnings_v2.json';
 
-@Service()
-export class DwdWarningsApi {
+@Service({ autoProvided: false })
+export class DwdWarningsApiService {
   private readonly http = inject(HttpClient);
 
   fetchWarnings(onProgress?: (fraction: number) => void): Promise<DwdWarningsFetchResult> {

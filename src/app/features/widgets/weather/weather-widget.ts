@@ -1,5 +1,5 @@
 import { Component, computed, effect, inject, input, resource, signal } from '@angular/core';
-import { BrightSkyApi, BrightSkyWeatherRecord } from './bright-sky-api';
+import { BrightSkyApiService, BrightSkyWeatherRecord } from './bright-sky-api.service';
 import { WeatherIcon } from './weather-icon';
 import { ProgressBar } from '@shared/ui/progress-bar/progress-bar';
 
@@ -39,9 +39,10 @@ const hourFormat = new Intl.DateTimeFormat('de-DE', { hour: '2-digit', minute: '
   selector: 'app-weather-widget',
   templateUrl: './weather-widget.html',
   imports: [WeatherIcon, ProgressBar],
+  providers: [BrightSkyApiService],
 })
 export class WeatherWidget {
-  private readonly api = inject(BrightSkyApi);
+  private readonly api = inject(BrightSkyApiService);
 
   readonly config = input<WeatherWidgetConfig>();
 

@@ -7,8 +7,8 @@ export interface WaterLevelMeasurement {
   value: number;
 }
 
-@Service()
-export class PegelOnlineApi {
+@Service({ autoProvided: false })
+export class PegelOnlineApiService {
   private readonly http = inject(HttpClient);
 
   async fetchRecentLevels(uuid: string, hours: number): Promise<WaterLevelMeasurement[]> {

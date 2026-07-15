@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { HeaderActions } from './header-actions';
+import { HeaderActionsService } from './header-actions.service';
 
 @Component({
   selector: 'app-shell',
@@ -9,5 +9,5 @@ import { HeaderActions } from './header-actions';
   imports: [RouterOutlet, CommonModule],
 })
 export class Shell {
-  protected readonly headerActions = inject(HeaderActions);
+  protected readonly headerActions = inject(HeaderActionsService);
 }
