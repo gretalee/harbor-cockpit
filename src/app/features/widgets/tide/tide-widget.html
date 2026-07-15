@@ -32,15 +32,15 @@
       <p class="mt-2 text-sm text-gray-500">Keine Gezeitendaten verfügbar.</p>
     }
 
-    <div
-      class="mt-4 flex h-[443px] w-full items-center justify-center overflow-x-auto overflow-y-hidden"
-    >
-      <iframe
-        [src]="chartUrl()"
-        title="Interaktive Wasserstands-Visualisierung"
-        class="border-bs-blue-900 h-[426px] w-[726px] rounded-md border"
-        scrolling="no"
-      ></iframe>
+    <div class="mt-4 h-[443px] w-full overflow-x-auto overflow-y-hidden">
+      <div class="flex min-w-[726px] items-center justify-center">
+        <iframe
+          [src]="chartUrl()"
+          title="Interaktive Wasserstands-Visualisierung"
+          class="border-bs-blue-900 h-[426px] w-[726px] shrink-0 rounded-md border"
+          scrolling="no"
+        ></iframe>
+      </div>
     </div>
   }
 </div>

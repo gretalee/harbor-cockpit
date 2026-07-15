@@ -30,14 +30,10 @@ import { HeaderActionsService } from '@app/layout/header-actions.service';
 export class Dashboard implements AfterViewInit, OnDestroy {
   private readonly _catalog = inject(WIDGET_CATALOG);
   protected readonly store = inject(DashboardStore);
-  private readonly headerActions = inject(HeaderActionsService);
-
-  private readonly headerActionsTemplate =
-    viewChild.required<TemplateRef<unknown>>('headerActionsTpl');
-
   protected readonly dashboardDropListId = DASHBOARD_DROP_LIST_ID;
   protected readonly isFlyoutOpen = signal(false);
 
+  // not yet shown on the dashboard:
   protected readonly availableWidgets = computed<WidgetPickerItem[]>(() => {
     const activeWidgetIds = new Set(this.store.widgets().map((instance) => instance.widgetId));
     return this._catalog
@@ -50,6 +46,7 @@ export class Dashboard implements AfterViewInit, OnDestroy {
       }));
   });
 
+  // all widgets currently shown on the dashboard:
   protected readonly dashboardWidgets = computed(() =>
     this.store.widgets().map((instance) => {
       const definition = this._catalog.find((widget) => widget.id === instance.widgetId);
@@ -61,6 +58,11 @@ export class Dashboard implements AfterViewInit, OnDestroy {
       };
     }),
   );
+
+  private readonly headerActions = inject(HeaderActionsService);
+
+  private readonly headerActionsTemplate =
+    viewChild.required<TemplateRef<unknown>>('headerActionsTpl');
 
   ngAfterViewInit(): void {
     this.headerActions.set(this.headerActionsTemplate());
@@ -77,8 +79,8 @@ export class Dashboard implements AfterViewInit, OnDestroy {
       }
       return;
     }
-    const item = event.item.data as WidgetPickerItem;
-    this.store.add(item.id, item.config, event.currentIndex);
+    const pickedWidget = event.item.data as WidgetPickerItem;
+    this.store.add(pickedWidget.id, pickedWidget.config, event.currentIndex);
     // this.isFlyoutOpen.set(false);
   }
 

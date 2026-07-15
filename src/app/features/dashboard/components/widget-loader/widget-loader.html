@@ -2,6 +2,6 @@
   <app-widget-skeleton />
 } @else if (loadingResource.error(); as error) {
   <app-widget-error [message]="error.toString()" />
-} @else if (loadingResource.value(); as type) {
-  <ng-container *ngComponentOutlet="type; inputs: { config: config() }" />
+} @else if (loadingResource.value(); as loadedComponent) {
+  <ng-container *ngComponentOutlet="loadedComponent; inputs: { config: config() }" />
 }

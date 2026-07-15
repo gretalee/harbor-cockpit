@@ -8,6 +8,7 @@ export const routes: Routes = [
   {
     path: '',
     component: Dashboard,
+    // loadComponent: () => import('@features/dashboard/dashboard').then((m) => m.Dashboard),
     title: 'Dashboard',
     providers: [provideWeatherWidget(), provideTideWidget(), provideSevereWeatherWidget()],
   },
